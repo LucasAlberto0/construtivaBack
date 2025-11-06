@@ -1,0 +1,6 @@
+@construtivaBack_HostAddress = http://localhost:5262
+
+GET {{construtivaBack_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

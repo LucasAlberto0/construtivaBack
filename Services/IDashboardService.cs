@@ -1,9 +1,9 @@
-
 using construtivaBack.DTOs;
 
-namespace construtivaBack.Services;
-
-public interface IDashboardService
+namespace construtivaBack.Services
 {
-    Task<DashboardStatsDto> GetDashboardStatsAsync();
+    public interface IDashboardService
+    {
+        Task<DashboardSummaryDto> ObterResumoDashboardAsync();
+    }
 }

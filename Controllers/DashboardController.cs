@@ -1,30 +1,28 @@
-using construtivaBack.Data;
 using construtivaBack.DTOs;
-using construtivaBack.Models;
 using construtivaBack.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
-namespace construtivaBack.Controllers;
-
-[Authorize]
-[Route("api/[controller]")]
-[ApiController]
-public class DashboardController : ControllerBase
+namespace construtivaBack.Controllers
 {
-    private readonly IDashboardService _dashboardService;
-
-    public DashboardController(IDashboardService dashboardService)
+    [Route("api/[controller]")]
+    [ApiController]
+    [Authorize]
+    public class DashboardController : ControllerBase
     {
-        _dashboardService = dashboardService;
-    }
+        private readonly IDashboardService _dashboardService;
 
-    // GET: api/Dashboard/stats
-    [HttpGet("stats")]
-    public async Task<ActionResult<DashboardStatsDto>> GetDashboardStats()
-    {
-        var stats = await _dashboardService.GetDashboardStatsAsync();
-        return Ok(stats);
+        public DashboardController(IDashboardService dashboardService)
+        {
+            _dashboardService = dashboardService;
+        }
+
+        // GET: api/Dashboard/summary
+        [HttpGet("summary")]
+        public async Task<ActionResult<DashboardSummaryDto>> GetDashboardSummary()
+        {
+            var summary = await _dashboardService.ObterResumoDashboardAsync();
+            return Ok(summary);
+        }
     }
 }

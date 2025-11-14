@@ -1,102 +1,121 @@
-
 using construtivaBack.Data;
 using construtivaBack.DTOs;
 using construtivaBack.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace construtivaBack.Services;
-
-public class ManutencaoService : IManutencaoService
+namespace construtivaBack.Services
 {
-    private readonly ApplicationDbContext _context;
-
-    public ManutencaoService(ApplicationDbContext context)
+    public class ManutencaoService : IManutencaoService
     {
-        _context = context;
-    }
+        private readonly ApplicationDbContext _context;
 
-    public async Task<IEnumerable<ManutencaoDto>> GetManutencoesByObraIdAsync(int obraId)
-    {
-        return await _context.Manutencoes
-            .Where(m => m.ObraId == obraId)
-            .Select(m => new ManutencaoDto
+        public ManutencaoService(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<IEnumerable<ManutencaoListagemDto>> ObterTodasManutencoesAsync(int obraId)
+        {
+            return await _context.Manutencoes
+                .Where(m => m.ObraId == obraId)
+                .Include(m => m.Obra)
+                .Select(m => new ManutencaoListagemDto
+                {
+                    Id = m.Id,
+                    DataInicio = m.DataInicio,
+                    DataTermino = m.DataTermino,
+                    ObraId = m.ObraId,
+                    NomeObra = m.Obra.Nome
+                })
+                .ToListAsync();
+        }
+
+        public async Task<ManutencaoDetalhesDto?> ObterManutencaoPorIdAsync(int id)
+        {
+            var manutencao = await _context.Manutencoes
+                .Include(m => m.Obra)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (manutencao == null)
             {
-                Id = m.Id,
-                ObraId = m.ObraId,
-                DataRegistro = m.DataRegistro,
-                Descricao = m.Descricao,
-                Imagens = m.Imagens.ToList()
-            })
-            .ToListAsync();
-    }
+                return null;
+            }
 
-    public async Task<ManutencaoDto?> CreateManutencaoAsync(int obraId, CreateManutencaoDto createDto)
-    {
-        var obraExists = await _context.Obras.AnyAsync(o => o.Id == obraId);
-        if (!obraExists) return null;
-
-        var manutencao = new Manutencao
-        {
-            ObraId = obraId,
-            DataRegistro = createDto.DataRegistro,
-            Descricao = createDto.Descricao
-        };
-
-        _context.Manutencoes.Add(manutencao);
-        await _context.SaveChangesAsync();
-
-        return new ManutencaoDto { Id = manutencao.Id, ObraId = manutencao.ObraId, DataRegistro = manutencao.DataRegistro, Descricao = manutencao.Descricao };
-    }
-
-    public async Task<bool> UpdateManutencaoAsync(int obraId, int manutencaoId, CreateManutencaoDto updateDto)
-    {
-        var manutencao = await _context.Manutencoes.FirstOrDefaultAsync(m => m.Id == manutencaoId && m.ObraId == obraId);
-        if (manutencao == null) return false;
-
-        manutencao.DataRegistro = updateDto.DataRegistro;
-        manutencao.Descricao = updateDto.Descricao;
-
-        await _context.SaveChangesAsync();
-        return true;
-    }
-
-    public async Task<bool> DeleteManutencaoAsync(int obraId, int manutencaoId)
-    {
-        var manutencao = await _context.Manutencoes.FirstOrDefaultAsync(m => m.Id == manutencaoId && m.ObraId == obraId);
-        if (manutencao == null) return false;
-
-        _context.Manutencoes.Remove(manutencao);
-        await _context.SaveChangesAsync();
-        return true;
-    }
-
-    public async Task<string?> UploadImagemAsync(int obraId, int manutencaoId, UploadFileDto model)
-    {
-        var manutencao = await _context.Manutencoes.FirstOrDefaultAsync(m => m.Id == manutencaoId && m.ObraId == obraId);
-        if (manutencao == null) return null;
-
-        if (model.File == null || model.File.Length == 0)
-        {
-            return "Nenhum arquivo enviado.";
+            return MapearParaManutencaoDetalhesDto(manutencao);
         }
 
-        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
-        var fileExtension = Path.GetExtension(model.File.FileName).ToLowerInvariant();
-        if (!allowedExtensions.Contains(fileExtension))
+        public async Task<ManutencaoDetalhesDto> CriarManutencaoAsync(ManutencaoCriacaoDto manutencaoDto)
         {
-            return "Tipo de arquivo não permitido. Apenas JPG e PNG são aceitos.";
+            var obraExiste = await _context.Obras.AnyAsync(o => o.Id == manutencaoDto.ObraId);
+            if (!obraExiste)
+            {
+                throw new ArgumentException("Obra não encontrada.");
+            }
+
+            var manutencao = new Manutencao
+            {
+                DataInicio = manutencaoDto.DataInicio,
+                DataTermino = manutencaoDto.DataTermino,
+                ImagemUrl = manutencaoDto.ImagemUrl,
+                DatasManutencao = manutencaoDto.DatasManutencao,
+                ObraId = manutencaoDto.ObraId
+            };
+
+            _context.Manutencoes.Add(manutencao);
+            await _context.SaveChangesAsync();
+
+            await _context.Entry(manutencao).Reference(m => m.Obra).LoadAsync();
+
+            return MapearParaManutencaoDetalhesDto(manutencao);
         }
 
-        var maxFileSize = 25 * 1024 * 1024; // 25 MB
-        if (model.File.Length > maxFileSize)
+        public async Task<ManutencaoDetalhesDto?> AtualizarManutencaoAsync(int id, ManutencaoAtualizacaoDto manutencaoDto)
         {
-            return $"Tamanho do arquivo excede o limite de {maxFileSize / (1024 * 1024)}MB.";
+            var manutencao = await _context.Manutencoes.FindAsync(id);
+
+            if (manutencao == null)
+            {
+                return null;
+            }
+
+            manutencao.DataInicio = manutencaoDto.DataInicio;
+            manutencao.DataTermino = manutencaoDto.DataTermino;
+            manutencao.ImagemUrl = manutencaoDto.ImagemUrl;
+            manutencao.DatasManutencao = manutencaoDto.DatasManutencao;
+
+            _context.Manutencoes.Update(manutencao);
+            await _context.SaveChangesAsync();
+
+            await _context.Entry(manutencao).Reference(m => m.Obra).LoadAsync();
+
+            return MapearParaManutencaoDetalhesDto(manutencao);
         }
 
-        var uniqueFileName = Guid.NewGuid().ToString() + fileExtension;
-        manutencao.Imagens.Add($"/uploads/manutencoes/{uniqueFileName}");
-        await _context.SaveChangesAsync();
+        public async Task<bool> ExcluirManutencaoAsync(int id)
+        {
+            var manutencao = await _context.Manutencoes.FindAsync(id);
+            if (manutencao == null)
+            {
+                return false;
+            }
 
-        return $"/uploads/manutencoes/{uniqueFileName}";
+            _context.Manutencoes.Remove(manutencao);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        private ManutencaoDetalhesDto MapearParaManutencaoDetalhesDto(Manutencao manutencao)
+        {
+            return new ManutencaoDetalhesDto
+            {
+                Id = manutencao.Id,
+                DataInicio = manutencao.DataInicio,
+                DataTermino = manutencao.DataTermino,
+                ImagemUrl = manutencao.ImagemUrl,
+                DatasManutencao = manutencao.DatasManutencao,
+                ObraId = manutencao.ObraId,
+                NomeObra = manutencao.Obra?.Nome
+            };
+        }
     }
 }

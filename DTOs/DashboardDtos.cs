@@ -1,11 +1,15 @@
+using System.Collections.Generic;
+using construtivaBack.Models;
 
-namespace construtivaBack.DTOs;
-
-public class DashboardStatsDto
+namespace construtivaBack.DTOs
 {
-    public int EmAndamento { get; set; }
-    public int Manutencao { get; set; }
-    public int Suspenso { get; set; }
-    public int Finalizado { get; set; }
-    public int TotalObras { get; set; }
+    public class DashboardSummaryDto
+    {
+        public int TotalObras { get; set; }
+        public int ObrasEmAndamento { get; set; }
+        public int ObrasEmManutencao { get; set; }
+        public int ObrasSuspensas { get; set; }
+        public int ObrasFinalizadas { get; set; }
+        public List<ObraListagemDto> ObrasRecentes { get; set; } = new List<ObraListagemDto>();
+    }
 }

@@ -1,124 +1,114 @@
-
 using construtivaBack.Data;
 using construtivaBack.DTOs;
 using construtivaBack.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace construtivaBack.Services;
-
-public class AditivoService : IAditivoService
+namespace construtivaBack.Services
 {
-    private readonly ApplicationDbContext _context;
-
-    public AditivoService(ApplicationDbContext context)
+    public class AditivoService : IAditivoService
     {
-        _context = context;
-    }
+        private readonly ApplicationDbContext _context;
 
-    public async Task<IEnumerable<AditivoDto>> GetAditivosByObraIdAsync(int obraId)
-    {
-        return await _context.Aditivos
-            .Where(a => a.ObraId == obraId)
-            .Select(a => new AditivoDto
+        public AditivoService(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<IEnumerable<AditivoListagemDto>> ObterTodosAditivosAsync(int obraId)
+        {
+            return await _context.Aditivos
+                .Where(a => a.ObraId == obraId)
+                .Include(a => a.Obra)
+                .Select(a => new AditivoListagemDto
+                {
+                    Id = a.Id,
+                    Descricao = a.Descricao,
+                    Data = a.Data,
+                    ObraId = a.ObraId
+                })
+                .ToListAsync();
+        }
+
+        public async Task<AditivoDetalhesDto?> ObterAditivoPorIdAsync(int id)
+        {
+            var aditivo = await _context.Aditivos
+                .Include(a => a.Obra)
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (aditivo == null)
             {
-                Id = a.Id,
-                ObraId = a.ObraId,
-                Descricao = a.Descricao,
-                AnexoPath = a.AnexoPath,
-                Aprovado = a.Aprovado,
-                DataAprovacao = a.DataAprovacao,
-                AprovadoPorUserId = a.AprovadoPorUserId
-            })
-            .ToListAsync();
-    }
+                return null;
+            }
 
-    public async Task<AditivoDto?> CreateAditivoAsync(int obraId, CreateAditivoDto createDto)
-    {
-        var obraExists = await _context.Obras.AnyAsync(o => o.Id == obraId);
-        if (!obraExists) return null;
-
-        var aditivo = new Aditivo
-        {
-            ObraId = obraId,
-            Descricao = createDto.Descricao,
-            Aprovado = false
-        };
-
-        _context.Aditivos.Add(aditivo);
-        await _context.SaveChangesAsync();
-
-        return new AditivoDto { Id = aditivo.Id, ObraId = aditivo.ObraId, Descricao = aditivo.Descricao };
-    }
-
-    public async Task<bool> UpdateAditivoAsync(int obraId, int aditivoId, CreateAditivoDto updateDto)
-    {
-        var aditivo = await _context.Aditivos.FirstOrDefaultAsync(a => a.Id == aditivoId && a.ObraId == obraId);
-        if (aditivo == null) return false;
-
-        aditivo.Descricao = updateDto.Descricao;
-
-        await _context.SaveChangesAsync();
-        return true;
-    }
-
-    public async Task<bool> DeleteAditivoAsync(int obraId, int aditivoId)
-    {
-        var aditivo = await _context.Aditivos.FirstOrDefaultAsync(a => a.Id == aditivoId && a.ObraId == obraId);
-        if (aditivo == null) return false;
-
-        _context.Aditivos.Remove(aditivo);
-        await _context.SaveChangesAsync();
-        return true;
-    }
-
-    public async Task<string?> UploadAnexoAsync(int obraId, int aditivoId, UploadFileDto model)
-    {
-        var aditivo = await _context.Aditivos.FirstOrDefaultAsync(a => a.Id == aditivoId && a.ObraId == obraId);
-        if (aditivo == null) return null;
-
-        if (model.File == null || model.File.Length == 0)
-        {
-            return "Nenhum arquivo enviado.";
+            return MapearParaAditivoDetalhesDto(aditivo);
         }
 
-        var allowedExtensions = new[] { ".pdf", ".doc", ".docx", ".jpg", ".jpeg", ".png" };
-        var fileExtension = Path.GetExtension(model.File.FileName).ToLowerInvariant();
-        if (!allowedExtensions.Contains(fileExtension))
+        public async Task<AditivoDetalhesDto> CriarAditivoAsync(AditivoCriacaoDto aditivoDto)
         {
-            return "Tipo de arquivo não permitido. Apenas PDF, DOC, DOCX, JPG e PNG são aceitos.";
+            var obraExiste = await _context.Obras.AnyAsync(o => o.Id == aditivoDto.ObraId);
+            if (!obraExiste)
+            {
+                throw new ArgumentException("Obra não encontrada.");
+            }
+
+            var aditivo = new Aditivo
+            {
+                Descricao = aditivoDto.Descricao,
+                Data = aditivoDto.Data,
+                ObraId = aditivoDto.ObraId
+            };
+
+            _context.Aditivos.Add(aditivo);
+            await _context.SaveChangesAsync();
+
+            await _context.Entry(aditivo).Reference(a => a.Obra).LoadAsync();
+
+            return MapearParaAditivoDetalhesDto(aditivo);
         }
 
-        var maxFileSize = 50 * 1024 * 1024; // 50 MB
-        if (model.File.Length > maxFileSize)
+        public async Task<AditivoDetalhesDto?> AtualizarAditivoAsync(int id, AditivoAtualizacaoDto aditivoDto)
         {
-            return $"Tamanho do arquivo excede o limite de {maxFileSize / (1024 * 1024)}MB.";
+            var aditivo = await _context.Aditivos.FindAsync(id);
+
+            if (aditivo == null)
+            {
+                return null;
+            }
+
+            aditivo.Descricao = aditivoDto.Descricao;
+            aditivo.Data = aditivoDto.Data;
+
+            _context.Aditivos.Update(aditivo);
+            await _context.SaveChangesAsync();
+
+            await _context.Entry(aditivo).Reference(a => a.Obra).LoadAsync();
+
+            return MapearParaAditivoDetalhesDto(aditivo);
         }
 
-        var uniqueFileName = Guid.NewGuid().ToString() + fileExtension;
-        var filePath = $"/uploads/aditivos/{obraId}/{aditivoId}/{uniqueFileName}";
-
-        aditivo.AnexoPath = filePath;
-        await _context.SaveChangesAsync();
-
-        return filePath;
-    }
-
-    public async Task<string?> AprovarAditivoAsync(int obraId, int aditivoId, AprovarAditivoDto model, string userId)
-    {
-        var aditivo = await _context.Aditivos.FirstOrDefaultAsync(a => a.Id == aditivoId && a.ObraId == obraId);
-        if (aditivo == null) return null;
-
-        if (aditivo.AnexoPath == null)
+        public async Task<bool> ExcluirAditivoAsync(int id)
         {
-            return "Aditivo deve ter um anexo antes de ser aprovado.";
+            var aditivo = await _context.Aditivos.FindAsync(id);
+            if (aditivo == null)
+            {
+                return false;
+            }
+
+            _context.Aditivos.Remove(aditivo);
+            await _context.SaveChangesAsync();
+            return true;
         }
 
-        aditivo.Aprovado = model.Aprovar;
-        aditivo.DataAprovacao = DateTime.UtcNow;
-        aditivo.AprovadoPorUserId = userId;
-
-        await _context.SaveChangesAsync();
-
-        return "OK";
+        private AditivoDetalhesDto MapearParaAditivoDetalhesDto(Aditivo aditivo)
+        {
+            return new AditivoDetalhesDto
+            {
+                Id = aditivo.Id,
+                Descricao = aditivo.Descricao,
+                Data = aditivo.Data,
+                ObraId = aditivo.ObraId,
+                NomeObra = aditivo.Obra?.Nome
+            };
+        }
     }
 }

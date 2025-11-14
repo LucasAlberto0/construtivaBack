@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("construtivaBack")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6691aa4c2015c6e1eab466940bf8123aa4f66893")]
 [assembly: System.Reflection.AssemblyProductAttribute("construtivaBack")]
 [assembly: System.Reflection.AssemblyTitleAttribute("construtivaBack")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

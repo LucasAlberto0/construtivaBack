@@ -1,79 +1,94 @@
-using construtivaBack.Data;
 using construtivaBack.DTOs;
-using construtivaBack.Models;
 using construtivaBack.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
-namespace construtivaBack.Controllers;
-
-[Authorize]
-[Route("api/obras/{obraId}/manutencoes")]
-[ApiController]
-public class ManutencoesController : ControllerBase
+namespace construtivaBack.Controllers
 {
-    private readonly IManutencaoService _manutencaoService;
-    private readonly IObraService _obraService; // Para verificar se a obra existe
-
-    public ManutencoesController(IManutencaoService manutencaoService, IObraService obraService)
+    [Route("api/obras/{obraId}/[controller]")]
+    [ApiController]
+    [Authorize]
+    public class ManutencoesController : ControllerBase
     {
-        _manutencaoService = manutencaoService;
-        _obraService = obraService;
-    }
+        private readonly IManutencaoService _manutencaoService;
 
-    // GET: api/obras/5/manutencoes
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<ManutencaoDto>>> GetManutencoes(int obraId)
-    {
-        if (!await _obraService.ObraExistsAsync(obraId)) return NotFound("Obra not found.");
-
-        var manutencoes = await _manutencaoService.GetManutencoesByObraIdAsync(obraId);
-        return Ok(manutencoes);
-    }
-
-    // POST: api/obras/5/manutencoes
-    [HttpPost]
-    public async Task<ActionResult<ManutencaoDto>> PostManutencao(int obraId, CreateManutencaoDto createDto)
-    {
-        var manutencaoDto = await _manutencaoService.CreateManutencaoAsync(obraId, createDto);
-        if (manutencaoDto == null) return NotFound("Obra not found.");
-
-        return CreatedAtAction(nameof(GetManutencoes), new { obraId = obraId, id = manutencaoDto.Id }, manutencaoDto);
-    }
-
-    // PUT: api/obras/5/manutencoes/1
-    [HttpPut("{manutencaoId}")]
-    public async Task<IActionResult> PutManutencao(int obraId, int manutencaoId, CreateManutencaoDto updateDto)
-    {
-        var result = await _manutencaoService.UpdateManutencaoAsync(obraId, manutencaoId, updateDto);
-        if (!result) return NotFound();
-
-        return NoContent();
-    }
-
-    // DELETE: api/obras/5/manutencoes/1
-    [HttpDelete("{manutencaoId}")]
-    [Authorize(Roles = "Administrador")] // Exemplo de proteção
-    public async Task<IActionResult> DeleteManutencao(int obraId, int manutencaoId)
-    {
-        var result = await _manutencaoService.DeleteManutencaoAsync(obraId, manutencaoId);
-        if (!result) return NotFound();
-
-        return NoContent();
-    }
-
-    // POST: api/obras/5/manutencoes/1/upload-imagem
-    [HttpPost("{manutencaoId}/upload-imagem")]
-    public async Task<IActionResult> UploadImagem(int obraId, int manutencaoId, [FromForm] UploadFileDto model)
-    {
-        var filePath = await _manutencaoService.UploadImagemAsync(obraId, manutencaoId, model);
-        if (filePath == null) return NotFound("Manutenção não encontrada.");
-        if (filePath.StartsWith("Nenhum arquivo") || filePath.StartsWith("Tipo de arquivo") || filePath.StartsWith("Tamanho do arquivo"))
+        public ManutencoesController(IManutencaoService manutencaoService)
         {
-            return BadRequest(filePath);
+            _manutencaoService = manutencaoService;
         }
 
-        return Ok(new { message = "Imagem enviada com sucesso!", filePath = filePath });
+        // GET: api/obras/{obraId}/Manutencoes
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<ManutencaoListagemDto>>> GetManutencoes(int obraId)
+        {
+            var manutencoes = await _manutencaoService.ObterTodasManutencoesAsync(obraId);
+            return Ok(manutencoes);
+        }
+
+        // GET: api/obras/{obraId}/Manutencoes/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ManutencaoDetalhesDto>> GetManutencao(int id)
+        {
+            var manutencao = await _manutencaoService.ObterManutencaoPorIdAsync(id);
+            if (manutencao == null)
+            {
+                return NotFound(new { Message = "Manutenção não encontrada." });
+            }
+            return Ok(manutencao);
+        }
+
+        // POST: api/obras/{obraId}/Manutencoes
+        [HttpPost]
+        public async Task<ActionResult<ManutencaoDetalhesDto>> PostManutencao(int obraId, [FromBody] ManutencaoCriacaoDto manutencaoDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (obraId != manutencaoDto.ObraId)
+            {
+                return BadRequest(new { Message = "O ID da obra na rota não corresponde ao ID da obra no corpo da requisição." });
+            }
+
+            try
+            {
+                var manutencaoCriada = await _manutencaoService.CriarManutencaoAsync(manutencaoDto);
+                return CreatedAtAction(nameof(GetManutencao), new { obraId = manutencaoCriada.ObraId, id = manutencaoCriada.Id }, manutencaoCriada);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+        // PUT: api/obras/{obraId}/Manutencoes/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutManutencao(int id, [FromBody] ManutencaoAtualizacaoDto manutencaoDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var manutencaoAtualizada = await _manutencaoService.AtualizarManutencaoAsync(id, manutencaoDto);
+            if (manutencaoAtualizada == null)
+            {
+                return NotFound(new { Message = "Manutenção não encontrada." });
+            }
+            return Ok(manutencaoAtualizada);
+        }
+
+        // DELETE: api/obras/{obraId}/Manutencoes/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteManutencao(int id)
+        {
+            var result = await _manutencaoService.ExcluirManutencaoAsync(id);
+            if (!result)
+            {
+                return NotFound(new { Message = "Manutenção não encontrada." });
+            }
+            return NoContent();
+        }
     }
 }

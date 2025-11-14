@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "p1vWmfjvYS0=",
+  "dgSpecHash": "UHgL9fnLK9s=",
   "success": true,
-  "projectFilePath": "/Users/alberto/Documents/construtiva/construtivaBack/construtivaBack.csproj",
+  "projectFilePath": "/Users/alberto/Documents/construtivaBack/construtivaBack.csproj",
   "expectedPackageFiles": [
     "/Users/alberto/.nuget/packages/humanizer.core/2.14.1/humanizer.core.2.14.1.nupkg.sha512",
     "/Users/alberto/.nuget/packages/microsoft.aspnetcore.authentication.jwtbearer/9.0.10/microsoft.aspnetcore.authentication.jwtbearer.9.0.10.nupkg.sha512",

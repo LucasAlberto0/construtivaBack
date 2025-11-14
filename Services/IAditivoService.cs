@@ -1,15 +1,13 @@
-
 using construtivaBack.DTOs;
-using construtivaBack.Models;
 
-namespace construtivaBack.Services;
-
-public interface IAditivoService
+namespace construtivaBack.Services
 {
-    Task<IEnumerable<AditivoDto>> GetAditivosByObraIdAsync(int obraId);
-    Task<AditivoDto?> CreateAditivoAsync(int obraId, CreateAditivoDto createDto);
-    Task<bool> UpdateAditivoAsync(int obraId, int aditivoId, CreateAditivoDto updateDto);
-    Task<bool> DeleteAditivoAsync(int obraId, int aditivoId);
-    Task<string?> UploadAnexoAsync(int obraId, int aditivoId, UploadFileDto model);
-    Task<string?> AprovarAditivoAsync(int obraId, int aditivoId, AprovarAditivoDto model, string userId);
+    public interface IAditivoService
+    {
+        Task<IEnumerable<AditivoListagemDto>> ObterTodosAditivosAsync(int obraId);
+        Task<AditivoDetalhesDto?> ObterAditivoPorIdAsync(int id);
+        Task<AditivoDetalhesDto> CriarAditivoAsync(AditivoCriacaoDto aditivoDto);
+        Task<AditivoDetalhesDto?> AtualizarAditivoAsync(int id, AditivoAtualizacaoDto aditivoDto);
+        Task<bool> ExcluirAditivoAsync(int id);
+    }
 }

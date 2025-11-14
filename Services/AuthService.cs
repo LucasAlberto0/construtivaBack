@@ -25,7 +25,7 @@ public class AuthService : IAuthService
         var userExists = await _userManager.FindByEmailAsync(model.Email);
         if (userExists != null)
         {
-            return IdentityResult.Failed(new IdentityError { Description = "User already exists!" });
+            return IdentityResult.Failed(new IdentityError { Code = "DuplicateEmail", Description = "Este email já está em uso." });
         }
 
         ApplicationUser user = new ApplicationUser()
@@ -36,8 +36,7 @@ public class AuthService : IAuthService
             NomeCompleto = model.NomeCompleto
         };
 
-        var result = await _userManager.CreateAsync(user, model.Password);
-        return result;
+        return await _userManager.CreateAsync(user, model.Password);
     }
 
     public async Task<UserTokenDto?> LoginUserAsync(LoginDto model)
@@ -48,6 +47,7 @@ public class AuthService : IAuthService
             var authClaims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.NameIdentifier, user.Id), // Adicionado para incluir o ID do usuário
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
 

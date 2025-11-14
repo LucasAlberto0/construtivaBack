@@ -1,15 +1,14 @@
-
 using construtivaBack.DTOs;
 using construtivaBack.Models;
 
-namespace construtivaBack.Services;
-
-public interface IObraService
+namespace construtivaBack.Services
 {
-    Task<IEnumerable<ObraDto>> GetAllObrasAsync();
-    Task<ObraDto?> GetObraByIdAsync(int id);
-    Task<ObraDto> CreateObraAsync(CreateObraDto createObraDto);
-    Task<bool> UpdateObraAsync(int id, CreateObraDto updateObraDto);
-    Task<bool> DeleteObraAsync(int id);
-    Task<bool> ObraExistsAsync(int id);
+    public interface IObraService
+    {
+        Task<IEnumerable<ObraListagemDto>> ObterTodasObrasAsync();
+        Task<ObraDetalhesDto?> ObterObraPorIdAsync(int id);
+        Task<ObraDetalhesDto> CriarObraAsync(ObraCriacaoDto obraDto, string userId);
+        Task<ObraDetalhesDto?> AtualizarObraAsync(int id, ObraAtualizacaoDto obraDto);
+        Task<bool> ExcluirObraAsync(int id);
+    }
 }

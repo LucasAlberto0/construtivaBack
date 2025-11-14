@@ -1,23 +1,48 @@
-
 using System.ComponentModel.DataAnnotations;
+using construtivaBack.Models;
 
-namespace construtivaBack.DTOs;
-
-public class DocumentoDto
+namespace construtivaBack.DTOs
 {
-    public int Id { get; set; }
-    public int ObraId { get; set; }
-    public string Nome { get; set; } = string.Empty;
-    public string Path { get; set; } = string.Empty;
-    public string Pasta { get; set; } = string.Empty;
-    public int Versao { get; set; } = 1;
-    public bool IsDeleted { get; set; } = false;
-}
+    // DTO para criação de um novo Documento
+    public class DocumentoCriacaoDto
+    {
+        [Required(ErrorMessage = "O nome do arquivo é obrigatório.")]
+        public string NomeArquivo { get; set; }
+        [Required(ErrorMessage = "A URL do arquivo é obrigatória.")]
+        public string Url { get; set; }
+        public TipoPasta? Pasta { get; set; }
+        [Required(ErrorMessage = "O ID da obra é obrigatório.")]
+        public int ObraId { get; set; }
+    }
 
-public class UploadDocumentoDto
-{
-    [Required]
-    public IFormFile File { get; set; } = default!;
+    // DTO para atualização de um Documento existente
+    public class DocumentoAtualizacaoDto
+    {
+        [Required(ErrorMessage = "O nome do arquivo é obrigatório.")]
+        public string NomeArquivo { get; set; }
+        [Required(ErrorMessage = "A URL do arquivo é obrigatória.")]
+        public string Url { get; set; }
+        public TipoPasta? Pasta { get; set; }
+    }
 
-    public string Pasta { get; set; } = "Geral";
+    // DTO para exibição de detalhes de um Documento
+    public class DocumentoDetalhesDto
+    {
+        public int Id { get; set; }
+        public string NomeArquivo { get; set; }
+        public string Url { get; set; }
+        public TipoPasta? Pasta { get; set; }
+        public int ObraId { get; set; }
+        public string? NomeObra { get; set; }
+    }
+
+    // DTO para listagem de Documentos
+    public class DocumentoListagemDto
+    {
+        public int Id { get; set; }
+        public string NomeArquivo { get; set; }
+        public string Url { get; set; }
+        public TipoPasta? Pasta { get; set; }
+        public int ObraId { get; set; }
+    }
 }

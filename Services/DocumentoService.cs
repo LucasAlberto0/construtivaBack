@@ -1,116 +1,117 @@
-
 using construtivaBack.Data;
 using construtivaBack.DTOs;
 using construtivaBack.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace construtivaBack.Services;
-
-public class DocumentoService : IDocumentoService
+namespace construtivaBack.Services
 {
-    private readonly ApplicationDbContext _context;
-
-    public DocumentoService(ApplicationDbContext context)
+    public class DocumentoService : IDocumentoService
     {
-        _context = context;
-    }
+        private readonly ApplicationDbContext _context;
 
-    public async Task<IEnumerable<DocumentoDto>> GetDocumentosByObraIdAsync(int obraId)
-    {
-        return await _context.Documentos
-            .Where(d => d.ObraId == obraId && !d.IsDeleted)
-            .Select(d => new DocumentoDto
+        public DocumentoService(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<IEnumerable<DocumentoListagemDto>> ObterTodosDocumentosAsync(int obraId)
+        {
+            return await _context.Documentos
+                .Where(d => d.ObraId == obraId)
+                .Select(d => new DocumentoListagemDto
+                {
+                    Id = d.Id,
+                    NomeArquivo = d.NomeArquivo,
+                    Url = d.Url,
+                    Pasta = d.Pasta,
+                    ObraId = d.ObraId
+                })
+                .ToListAsync();
+        }
+
+        public async Task<DocumentoDetalhesDto?> ObterDocumentoPorIdAsync(int id)
+        {
+            var documento = await _context.Documentos
+                .Include(d => d.Obra)
+                .FirstOrDefaultAsync(d => d.Id == id);
+
+            if (documento == null)
             {
-                Id = d.Id,
-                ObraId = d.ObraId,
-                Nome = d.Nome,
-                Path = d.Path,
-                Pasta = d.Pasta,
-                Versao = d.Versao,
-                IsDeleted = d.IsDeleted
-            })
-            .ToListAsync();
-    }
+                return null;
+            }
 
-    public async Task<string?> UploadDocumentoAsync(int obraId, UploadDocumentoDto model)
-    {
-        var obraExists = await _context.Obras.AnyAsync(o => o.Id == obraId);
-        if (!obraExists) return null; // Indica que a obra não foi encontrada
-
-        if (model.File == null || model.File.Length == 0)
-        {
-            return "Nenhum arquivo enviado.";
+            return MapearParaDocumentoDetalhesDto(documento);
         }
 
-        var allowedExtensions = new[] { ".pdf", ".doc", ".docx", ".jpg", ".jpeg", ".png" };
-        var fileExtension = Path.GetExtension(model.File.FileName).ToLowerInvariant();
-        if (!allowedExtensions.Contains(fileExtension))
+        public async Task<DocumentoDetalhesDto> CriarDocumentoAsync(DocumentoCriacaoDto documentoDto)
         {
-            return "Tipo de arquivo não permitido. Apenas PDF, DOC, DOCX, JPG e PNG são aceitos.";
+            var obraExiste = await _context.Obras.AnyAsync(o => o.Id == documentoDto.ObraId);
+            if (!obraExiste)
+            {
+                throw new ArgumentException("Obra não encontrada.");
+            }
+
+            var documento = new Documento
+            {
+                NomeArquivo = documentoDto.NomeArquivo,
+                Url = documentoDto.Url,
+                Pasta = documentoDto.Pasta,
+                ObraId = documentoDto.ObraId
+            };
+
+            _context.Documentos.Add(documento);
+            await _context.SaveChangesAsync();
+
+            await _context.Entry(documento).Reference(d => d.Obra).LoadAsync();
+
+            return MapearParaDocumentoDetalhesDto(documento);
         }
 
-        var maxFileSize = 50 * 1024 * 1024; // 50 MB
-        if (model.File.Length > maxFileSize)
+        public async Task<DocumentoDetalhesDto?> AtualizarDocumentoAsync(int id, DocumentoAtualizacaoDto documentoDto)
         {
-            return $"Tamanho do arquivo excede o limite de {maxFileSize / (1024 * 1024)}MB.";
+            var documento = await _context.Documentos.FindAsync(id);
+
+            if (documento == null)
+            {
+                return null;
+            }
+
+            documento.NomeArquivo = documentoDto.NomeArquivo;
+            documento.Url = documentoDto.Url;
+            documento.Pasta = documentoDto.Pasta;
+
+            _context.Documentos.Update(documento);
+            await _context.SaveChangesAsync();
+
+            await _context.Entry(documento).Reference(d => d.Obra).LoadAsync();
+
+            return MapearParaDocumentoDetalhesDto(documento);
         }
 
-        var existingDoc = await _context.Documentos
-            .Where(d => d.ObraId == obraId && d.Nome == model.File.FileName && !d.IsDeleted)
-            .OrderByDescending(d => d.Versao)
-            .FirstOrDefaultAsync();
-
-        int newVersion = 1;
-        if (existingDoc != null)
+        public async Task<bool> ExcluirDocumentoAsync(int id)
         {
-            newVersion = existingDoc.Versao + 1;
+            var documento = await _context.Documentos.FindAsync(id);
+            if (documento == null)
+            {
+                return false;
+            }
+
+            _context.Documentos.Remove(documento);
+            await _context.SaveChangesAsync();
+            return true;
         }
 
-        var uniqueFileName = Guid.NewGuid().ToString() + fileExtension;
-        var filePath = $"/uploads/documentos/{obraId}/{uniqueFileName}";
-
-        var documento = new Documento
+        private DocumentoDetalhesDto MapearParaDocumentoDetalhesDto(Documento documento)
         {
-            ObraId = obraId,
-            Nome = model.File.FileName,
-            Path = filePath,
-            Pasta = model.Pasta,
-            Versao = newVersion,
-            IsDeleted = false
-        };
-
-        _context.Documentos.Add(documento);
-        await _context.SaveChangesAsync();
-
-        return filePath; // Retorna o caminho do arquivo
-    }
-
-    public async Task<bool> DeleteDocumentoAsync(int obraId, int documentoId)
-    {
-        var documento = await _context.Documentos.FirstOrDefaultAsync(d => d.Id == documentoId && d.ObraId == obraId);
-        if (documento == null) return false;
-
-        documento.IsDeleted = true;
-        _context.Entry(documento).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
-
-        return true;
-    }
-
-    public async Task<DocumentoDto?> GetDocumentoForDownloadAsync(int obraId, int documentoId)
-    {
-        var documento = await _context.Documentos.FirstOrDefaultAsync(d => d.Id == documentoId && d.ObraId == obraId && !d.IsDeleted);
-        if (documento == null) return null;
-
-        return new DocumentoDto
-        {
-            Id = documento.Id,
-            ObraId = documento.ObraId,
-            Nome = documento.Nome,
-            Path = documento.Path,
-            Pasta = documento.Pasta,
-            Versao = documento.Versao,
-            IsDeleted = documento.IsDeleted
-        };
+            return new DocumentoDetalhesDto
+            {
+                Id = documento.Id,
+                NomeArquivo = documento.NomeArquivo,
+                Url = documento.Url,
+                Pasta = documento.Pasta ?? TipoPasta.Outros,
+                ObraId = documento.ObraId,
+                NomeObra = documento.Obra?.Nome
+            };
+        }
     }
 }

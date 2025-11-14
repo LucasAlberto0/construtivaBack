@@ -1,15 +1,17 @@
-
 using construtivaBack.DTOs;
-using construtivaBack.Models;
 
-namespace construtivaBack.Services;
-
-public interface IDiarioService
+namespace construtivaBack.Services
 {
-    Task<IEnumerable<DiarioObraDto>> GetDiariosByObraIdAsync(int obraId);
-    Task<DiarioObraDto?> GetDiarioByIdAsync(int obraId, int diarioId);
-    Task<DiarioObraDto?> CreateDiarioAsync(int obraId, CreateDiarioObraDto createDto);
-    Task<bool> UpdateDiarioAsync(int obraId, int diarioId, CreateDiarioObraDto updateDto);
-    Task<bool> DeleteDiarioAsync(int obraId, int diarioId);
-    Task<string?> UploadFotoAsync(int obraId, int diarioId, UploadFileDto model);
+    public interface IDiarioService
+    {
+        Task<IEnumerable<DiarioObraListagemDto>> ObterTodosDiariosAsync(int obraId);
+        Task<DiarioObraDetalhesDto?> ObterDiarioPorIdAsync(int id);
+        Task<DiarioObraDetalhesDto> CriarDiarioAsync(DiarioObraCriacaoDto diarioDto);
+        Task<DiarioObraDetalhesDto?> AtualizarDiarioAsync(int id, DiarioObraAtualizacaoDto diarioDto);
+        Task<bool> ExcluirDiarioAsync(int id);
+        Task<FotoDiarioDto?> AdicionarFotoDiarioAsync(int diarioId, string urlFoto);
+        Task<bool> RemoverFotoDiarioAsync(int fotoId);
+        Task<ComentarioDto?> AdicionarComentarioDiarioAsync(int diarioId, ComentarioCriacaoDto comentarioDto);
+        Task<bool> RemoverComentarioDiarioAsync(int comentarioId);
+    }
 }

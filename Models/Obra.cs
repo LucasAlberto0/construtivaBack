@@ -1,38 +1,50 @@
-
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace construtivaBack.Models;
-
-public enum ObraStatus
+namespace construtivaBack.Models
 {
-    EmAndamento,
-    Manutencao,
-    Suspenso,
-    Finalizado
-}
+    public enum ObraStatus
+    {
+        EmAndamento,
+        EmManutencao,
+        Suspenso,
+        Finalizado
+    }
 
-public class Obra
-{
-    public int Id { get; set; }
+    public class Obra
+    {
+        [Key]
+        public int Id { get; set; }
 
-    [Required]
-    [StringLength(100)]
-    public string Nome { get; set; } = string.Empty;
+        // Dados básicos
+        [Required]
+        public string Nome { get; set; }
+        public string? Localizacao { get; set; }
+        public string? Contratante { get; set; }
+        public string? Contrato { get; set; }
+        public string? OrdemInicioServico { get; set; }
 
-    [Required]
-    public string Localizacao { get; set; } = string.Empty;
+        // Responsáveis
+        public string? CoordenadorNome { get; set; }
 
-    [Required]
-    public string Contratante { get; set; } = string.Empty;
+        public string? AdministradorId { get; set; }
+        public virtual ApplicationUser? Administrador { get; set; }
 
-    public string? Contrato { get; set; }
-    public string? OrdemDeServico { get; set; }
+        public string? ResponsavelTecnicoNome { get; set; }
 
-    public ObraStatus Status { get; set; }
+        public string? Equipe { get; set; }
 
-    // Navigation Properties
-    public virtual ICollection<ApplicationUser> Equipe { get; set; } = new List<ApplicationUser>();
-    public virtual ICollection<DiarioObra> Diarios { get; set; } = new List<DiarioObra>();
-    public virtual ICollection<Documento> Documentos { get; set; } = new List<Documento>();
-    public virtual ICollection<Manutencao> Manutencoes { get; set; } = new List<Manutencao>();
+        // Status dos serviços
+        public DateTime? DataInicio { get; set; }
+        public DateTime? DataTermino { get; set; }
+        public ObraStatus Status { get; set; } = ObraStatus.EmAndamento;
+
+        // Navigation properties
+        public virtual ICollection<Aditivo> Aditivos { get; set; } = new List<Aditivo>();
+        public virtual ICollection<Manutencao> Manutencoes { get; set; } = new List<Manutencao>();
+        public virtual ICollection<DiarioObra> DiariosObra { get; set; } = new List<DiarioObra>();
+        public virtual ICollection<Documento> Documentos { get; set; } = new List<Documento>();
+        public virtual ICollection<Checklist> Checklists { get; set; } = new List<Checklist>();
+    }
 }

@@ -1,21 +1,18 @@
-
+using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace construtivaBack.Models;
-
-public class Aditivo
+namespace construtivaBack.Models
 {
-    public int Id { get; set; }
-    public int ObraId { get; set; }
-
-    [Required]
-    public string Descricao { get; set; } = string.Empty;
-    public string? AnexoPath { get; set; } // RN003: Cada aditivo deve ter anexo
-    public bool Aprovado { get; set; } = false;
-    public DateTime? DataAprovacao { get; set; }
-    public string? AprovadoPorUserId { get; set; }
-
-    // Navigation Properties
-    public virtual Obra? Obra { get; set; }
-    public virtual ApplicationUser? AprovadoPorUser { get; set; }
+    public class Aditivo
+    {
+        [Key]
+        public int Id { get; set; }
+        public string Descricao { get; set; }
+        public DateTime Data { get; set; }
+        
+        public int ObraId { get; set; }
+        [ForeignKey("ObraId")]
+        public virtual Obra Obra { get; set; }
+    }
 }

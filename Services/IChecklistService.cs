@@ -1,13 +1,16 @@
-
 using construtivaBack.DTOs;
-using construtivaBack.Models;
 
-namespace construtivaBack.Services;
-
-public interface IChecklistService
+namespace construtivaBack.Services
 {
-    Task<IEnumerable<ChecklistDto>> GetChecklistsByObraIdAsync(int obraId);
-    Task<ChecklistDto?> CreateChecklistAsync(int obraId, CreateChecklistDto createDto);
-    Task<bool> UpdateChecklistItemAsync(int obraId, int checklistId, int itemId, UpdateChecklistItemDto updateDto);
-    Task<bool> DeleteChecklistAsync(int obraId, int checklistId);
+    public interface IChecklistService
+    {
+        Task<IEnumerable<ChecklistListagemDto>> ObterTodosChecklistsAsync(int obraId);
+        Task<ChecklistDetalhesDto?> ObterChecklistPorIdAsync(int id);
+        Task<ChecklistDetalhesDto> CriarChecklistAsync(ChecklistCriacaoDto checklistDto);
+        Task<ChecklistDetalhesDto?> AtualizarChecklistAsync(int id, ChecklistAtualizacaoDto checklistDto);
+        Task<bool> ExcluirChecklistAsync(int id);
+        Task<ChecklistItemDto?> AdicionarItemChecklistAsync(int checklistId, ChecklistItemCriacaoDto itemDto);
+        Task<ChecklistItemDto?> AtualizarItemChecklistAsync(int itemId, ChecklistItemAtualizacaoDto itemDto);
+        Task<bool> ExcluirItemChecklistAsync(int itemId);
+    }
 }

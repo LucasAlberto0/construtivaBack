@@ -1,65 +1,145 @@
-using construtivaBack.Data;
 using construtivaBack.DTOs;
-using construtivaBack.Models;
 using construtivaBack.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
-namespace construtivaBack.Controllers;
-
-[Authorize]
-[Route("api/obras/{obraId}/checklists")]
-[ApiController]
-public class ChecklistsController : ControllerBase
+namespace construtivaBack.Controllers
 {
-    private readonly IChecklistService _checklistService;
-    private readonly IObraService _obraService; // Para verificar se a obra existe
-
-    public ChecklistsController(IChecklistService checklistService, IObraService obraService)
+    [Route("api/obras/{obraId}/[controller]")]
+    [ApiController]
+    [Authorize]
+    public class ChecklistsController : ControllerBase
     {
-        _checklistService = checklistService;
-        _obraService = obraService;
-    }
+        private readonly IChecklistService _checklistService;
 
-    // GET: api/obras/5/checklists
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<ChecklistDto>>> GetChecklists(int obraId)
-    {
-        if (!await _obraService.ObraExistsAsync(obraId)) return NotFound("Obra not found.");
+        public ChecklistsController(IChecklistService checklistService)
+        {
+            _checklistService = checklistService;
+        }
 
-        var checklists = await _checklistService.GetChecklistsByObraIdAsync(obraId);
-        return Ok(checklists);
-    }
+        // GET: api/obras/{obraId}/Checklists
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<ChecklistListagemDto>>> GetChecklists(int obraId)
+        {
+            var checklists = await _checklistService.ObterTodosChecklistsAsync(obraId);
+            return Ok(checklists);
+        }
 
-    // POST: api/obras/5/checklists
-    [HttpPost]
-    public async Task<ActionResult<ChecklistDto>> PostChecklist(int obraId, CreateChecklistDto createDto)
-    {
-        var checklistDto = await _checklistService.CreateChecklistAsync(obraId, createDto);
-        if (checklistDto == null) return NotFound("Obra not found.");
+        // GET: api/obras/{obraId}/Checklists/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ChecklistDetalhesDto>> GetChecklist(int id)
+        {
+            var checklist = await _checklistService.ObterChecklistPorIdAsync(id);
+            if (checklist == null)
+            {
+                return NotFound(new { Message = "Checklist não encontrado." });
+            }
+            return Ok(checklist);
+        }
 
-        return CreatedAtAction(nameof(GetChecklists), new { obraId = obraId, id = checklistDto.Id }, checklistDto);
-    }
+        // POST: api/obras/{obraId}/Checklists
+        [HttpPost]
+        public async Task<ActionResult<ChecklistDetalhesDto>> PostChecklist(int obraId, [FromBody] ChecklistCriacaoDto checklistDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-    // PUT: api/obras/5/checklists/1/itens/1
-    [HttpPut("{checklistId}/itens/{itemId}")]
-    public async Task<IActionResult> UpdateChecklistItem(int obraId, int checklistId, int itemId, UpdateChecklistItemDto updateDto)
-    {
-        var result = await _checklistService.UpdateChecklistItemAsync(obraId, checklistId, itemId, updateDto);
-        if (!result) return NotFound();
+            if (obraId != checklistDto.ObraId)
+            {
+                return BadRequest(new { Message = "O ID da obra na rota não corresponde ao ID da obra no corpo da requisição." });
+            }
 
-        return NoContent();
-    }
+            try
+            {
+                var checklistCriado = await _checklistService.CriarChecklistAsync(checklistDto);
+                return CreatedAtAction(nameof(GetChecklist), new { obraId = checklistCriado.ObraId, id = checklistCriado.Id }, checklistCriado);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
 
-    // DELETE: api/obras/5/checklists/1
-    [HttpDelete("{checklistId}")]
-    [Authorize(Roles = "Administrador")]
-    public async Task<IActionResult> DeleteChecklist(int obraId, int checklistId)
-    {
-        var result = await _checklistService.DeleteChecklistAsync(obraId, checklistId);
-        if (!result) return NotFound();
+        // PUT: api/obras/{obraId}/Checklists/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutChecklist(int id, [FromBody] ChecklistAtualizacaoDto checklistDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-        return NoContent();
+            var checklistAtualizado = await _checklistService.AtualizarChecklistAsync(id, checklistDto);
+            if (checklistAtualizado == null)
+            {
+                return NotFound(new { Message = "Checklist não encontrado." });
+            }
+            return Ok(checklistAtualizado);
+        }
+
+        // DELETE: api/obras/{obraId}/Checklists/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteChecklist(int id)
+        {
+            var result = await _checklistService.ExcluirChecklistAsync(id);
+            if (!result)
+            {
+                return NotFound(new { Message = "Checklist não encontrado." });
+            }
+            return NoContent();
+        }
+
+        // POST: api/obras/{obraId}/Checklists/{checklistId}/itens
+        [HttpPost("{checklistId}/itens")]
+        public async Task<ActionResult<ChecklistItemDto>> PostChecklistItem(int checklistId, [FromBody] ChecklistItemCriacaoDto itemDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var itemCriado = await _checklistService.AdicionarItemChecklistAsync(checklistId, itemDto);
+            if (itemCriado == null)
+            {
+                return NotFound(new { Message = "Checklist não encontrado." });
+            }
+            return CreatedAtAction(nameof(GetChecklist), new { id = checklistId }, itemCriado);
+        }
+
+        // PUT: api/obras/{obraId}/Checklists/{checklistId}/itens/{itemId}
+        [HttpPut("{checklistId}/itens/{itemId}")]
+        public async Task<IActionResult> PutChecklistItem(int itemId, [FromBody] ChecklistItemAtualizacaoDto itemDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (itemId != itemDto.Id)
+            {
+                return BadRequest(new { Message = "O ID do item na rota não corresponde ao ID do item no corpo da requisição." });
+            }
+
+            var itemAtualizado = await _checklistService.AtualizarItemChecklistAsync(itemId, itemDto);
+            if (itemAtualizado == null)
+            {
+                return NotFound(new { Message = "Item do Checklist não encontrado." });
+            }
+            return Ok(itemAtualizado);
+        }
+
+        // DELETE: api/obras/{obraId}/Checklists/{checklistId}/itens/{itemId}
+        [HttpDelete("{checklistId}/itens/{itemId}")]
+        public async Task<IActionResult> DeleteChecklistItem(int itemId)
+        {
+            var result = await _checklistService.ExcluirItemChecklistAsync(itemId);
+            if (!result)
+            {
+                return NotFound(new { Message = "Item do Checklist não encontrado." });
+            }
+            return NoContent();
+        }
     }
 }

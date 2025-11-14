@@ -12,8 +12,8 @@ using construtivaBack.Data;
 namespace construtivaBack.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251106021611_ConexaoBd")]
-    partial class ConexaoBd
+    [Migration("20251112210503_ConexaoBD")]
+    partial class ConexaoBD
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -165,16 +165,7 @@ namespace construtivaBack.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AnexoPath")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("Aprovado")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("AprovadoPorUserId")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("DataAprovacao")
+                    b.Property<DateTime>("Data")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Descricao")
@@ -185,8 +176,6 @@ namespace construtivaBack.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AprovadoPorUserId");
 
                     b.HasIndex("ObraId");
 
@@ -229,9 +218,6 @@ namespace construtivaBack.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
-                    b.Property<int?>("ObraId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("PasswordHash")
                         .HasColumnType("text");
 
@@ -259,8 +245,6 @@ namespace construtivaBack.Migrations
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
-
-                    b.HasIndex("ObraId");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -300,8 +284,11 @@ namespace construtivaBack.Migrations
                     b.Property<bool>("Concluido")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("Descricao")
+                    b.Property<string>("Nome")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Observacao")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -319,25 +306,25 @@ namespace construtivaBack.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("ObraId")
+                    b.Property<string>("AutorId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("Data")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("DiarioObraId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Texto")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("ObraId");
+                    b.HasIndex("AutorId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("DiarioObraId");
 
                     b.ToTable("Comentarios");
                 });
@@ -350,24 +337,17 @@ namespace construtivaBack.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AtividadesRealizadas")
+                    b.Property<string>("Atividades")
                         .HasColumnType("text");
 
                     b.Property<string>("Clima")
                         .HasColumnType("text");
 
-                    b.Property<string>("ComentariosTecnicos")
+                    b.Property<string>("Colaboradores")
                         .HasColumnType("text");
 
                     b.Property<DateTime>("Data")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("EquipePresente")
-                        .HasColumnType("text");
-
-                    b.PrimitiveCollection<string[]>("Fotos")
-                        .IsRequired()
-                        .HasColumnType("text[]");
 
                     b.Property<int>("ObraId")
                         .HasColumnType("integer");
@@ -387,32 +367,47 @@ namespace construtivaBack.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Nome")
+                    b.Property<string>("NomeArquivo")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("ObraId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Pasta")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Path")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("Versao")
+                    b.Property<int?>("Pasta")
                         .HasColumnType("integer");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ObraId");
 
                     b.ToTable("Documentos");
+                });
+
+            modelBuilder.Entity("construtivaBack.Models.FotoDiario", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DiarioObraId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DiarioObraId");
+
+                    b.ToTable("FotosDiario");
                 });
 
             modelBuilder.Entity("construtivaBack.Models.Manutencao", b =>
@@ -423,16 +418,17 @@ namespace construtivaBack.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("DataRegistro")
+                    b.Property<DateTime>("DataInicio")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Descricao")
-                        .IsRequired()
+                    b.Property<DateTime>("DataTermino")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DatasManutencao")
                         .HasColumnType("text");
 
-                    b.PrimitiveCollection<string[]>("Imagens")
-                        .IsRequired()
-                        .HasColumnType("text[]");
+                    b.Property<string>("ImagemUrl")
+                        .HasColumnType("text");
 
                     b.Property<int>("ObraId")
                         .HasColumnType("integer");
@@ -452,29 +448,50 @@ namespace construtivaBack.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AdministradorId")
+                        .HasColumnType("text");
+
                     b.Property<string>("Contratante")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Contrato")
                         .HasColumnType("text");
 
+                    b.Property<string>("CoordenadorId")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("DataInicio")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DataTermino")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Equipe")
+                        .HasColumnType("text");
+
                     b.Property<string>("Localizacao")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Nome")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("text");
 
-                    b.Property<string>("OrdemDeServico")
+                    b.Property<string>("OrdemInicioServico")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ResponsavelTecnicoId")
                         .HasColumnType("text");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AdministradorId");
+
+                    b.HasIndex("CoordenadorId");
+
+                    b.HasIndex("ResponsavelTecnicoId");
 
                     b.ToTable("Obras");
                 });
@@ -532,32 +549,19 @@ namespace construtivaBack.Migrations
 
             modelBuilder.Entity("construtivaBack.Models.Aditivo", b =>
                 {
-                    b.HasOne("construtivaBack.Models.ApplicationUser", "AprovadoPorUser")
-                        .WithMany()
-                        .HasForeignKey("AprovadoPorUserId");
-
                     b.HasOne("construtivaBack.Models.Obra", "Obra")
-                        .WithMany()
+                        .WithMany("Aditivos")
                         .HasForeignKey("ObraId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("AprovadoPorUser");
-
                     b.Navigation("Obra");
-                });
-
-            modelBuilder.Entity("construtivaBack.Models.ApplicationUser", b =>
-                {
-                    b.HasOne("construtivaBack.Models.Obra", null)
-                        .WithMany("Equipe")
-                        .HasForeignKey("ObraId");
                 });
 
             modelBuilder.Entity("construtivaBack.Models.Checklist", b =>
                 {
                     b.HasOne("construtivaBack.Models.Obra", "Obra")
-                        .WithMany()
+                        .WithMany("Checklists")
                         .HasForeignKey("ObraId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -578,27 +582,25 @@ namespace construtivaBack.Migrations
 
             modelBuilder.Entity("construtivaBack.Models.Comentario", b =>
                 {
-                    b.HasOne("construtivaBack.Models.Obra", "Obra")
+                    b.HasOne("construtivaBack.Models.ApplicationUser", "Autor")
                         .WithMany()
-                        .HasForeignKey("ObraId")
+                        .HasForeignKey("AutorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("construtivaBack.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("construtivaBack.Models.DiarioObra", "DiarioObra")
+                        .WithMany("Comentarios")
+                        .HasForeignKey("DiarioObraId");
 
-                    b.Navigation("Obra");
+                    b.Navigation("Autor");
 
-                    b.Navigation("User");
+                    b.Navigation("DiarioObra");
                 });
 
             modelBuilder.Entity("construtivaBack.Models.DiarioObra", b =>
                 {
                     b.HasOne("construtivaBack.Models.Obra", "Obra")
-                        .WithMany("Diarios")
+                        .WithMany("DiariosObra")
                         .HasForeignKey("ObraId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -617,6 +619,17 @@ namespace construtivaBack.Migrations
                     b.Navigation("Obra");
                 });
 
+            modelBuilder.Entity("construtivaBack.Models.FotoDiario", b =>
+                {
+                    b.HasOne("construtivaBack.Models.DiarioObra", "DiarioObra")
+                        .WithMany("Fotos")
+                        .HasForeignKey("DiarioObraId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DiarioObra");
+                });
+
             modelBuilder.Entity("construtivaBack.Models.Manutencao", b =>
                 {
                     b.HasOne("construtivaBack.Models.Obra", "Obra")
@@ -628,18 +641,48 @@ namespace construtivaBack.Migrations
                     b.Navigation("Obra");
                 });
 
+            modelBuilder.Entity("construtivaBack.Models.Obra", b =>
+                {
+                    b.HasOne("construtivaBack.Models.ApplicationUser", "Administrador")
+                        .WithMany()
+                        .HasForeignKey("AdministradorId");
+
+                    b.HasOne("construtivaBack.Models.ApplicationUser", "Coordenador")
+                        .WithMany()
+                        .HasForeignKey("CoordenadorId");
+
+                    b.HasOne("construtivaBack.Models.ApplicationUser", "ResponsavelTecnico")
+                        .WithMany()
+                        .HasForeignKey("ResponsavelTecnicoId");
+
+                    b.Navigation("Administrador");
+
+                    b.Navigation("Coordenador");
+
+                    b.Navigation("ResponsavelTecnico");
+                });
+
             modelBuilder.Entity("construtivaBack.Models.Checklist", b =>
                 {
                     b.Navigation("Itens");
                 });
 
+            modelBuilder.Entity("construtivaBack.Models.DiarioObra", b =>
+                {
+                    b.Navigation("Comentarios");
+
+                    b.Navigation("Fotos");
+                });
+
             modelBuilder.Entity("construtivaBack.Models.Obra", b =>
                 {
-                    b.Navigation("Diarios");
+                    b.Navigation("Aditivos");
+
+                    b.Navigation("Checklists");
+
+                    b.Navigation("DiariosObra");
 
                     b.Navigation("Documentos");
-
-                    b.Navigation("Equipe");
 
                     b.Navigation("Manutencoes");
                 });

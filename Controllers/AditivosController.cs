@@ -1,96 +1,94 @@
-using construtivaBack.Data;
 using construtivaBack.DTOs;
-using construtivaBack.Models;
 using construtivaBack.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 
-namespace construtivaBack.Controllers;
-
-[Authorize]
-[Route("api/obras/{obraId}/aditivos")]
-[ApiController]
-public class AditivosController : ControllerBase
+namespace construtivaBack.Controllers
 {
-    private readonly IAditivoService _aditivoService;
-    private readonly IObraService _obraService; // Para verificar se a obra existe
-
-    public AditivosController(IAditivoService aditivoService, IObraService obraService)
+    [Route("api/obras/{obraId}/[controller]")]
+    [ApiController]
+    [Authorize]
+    public class AditivosController : ControllerBase
     {
-        _aditivoService = aditivoService;
-        _obraService = obraService;
-    }
+        private readonly IAditivoService _aditivoService;
 
-    // GET: api/obras/5/aditivos
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<AditivoDto>>> GetAditivos(int obraId)
-    {
-        if (!await _obraService.ObraExistsAsync(obraId)) return NotFound("Obra not found.");
-
-        var aditivos = await _aditivoService.GetAditivosByObraIdAsync(obraId);
-        return Ok(aditivos);
-    }
-
-    // POST: api/obras/5/aditivos
-    [HttpPost]
-    public async Task<ActionResult<AditivoDto>> PostAditivo(int obraId, CreateAditivoDto createDto)
-    {
-        var aditivoDto = await _aditivoService.CreateAditivoAsync(obraId, createDto);
-        if (aditivoDto == null) return NotFound("Obra not found.");
-
-        return CreatedAtAction(nameof(GetAditivos), new { obraId = obraId, id = aditivoDto.Id }, aditivoDto);
-    }
-
-    // PUT: api/obras/5/aditivos/1
-    [HttpPut("{aditivoId}")]
-    public async Task<IActionResult> PutAditivo(int obraId, int aditivoId, CreateAditivoDto updateDto)
-    {
-        var result = await _aditivoService.UpdateAditivoAsync(obraId, aditivoId, updateDto);
-        if (!result) return NotFound();
-
-        return NoContent();
-    }
-
-    // DELETE: api/obras/5/aditivos/1
-    [HttpDelete("{aditivoId}")]
-    [Authorize(Roles = "Administrador")]
-    public async Task<IActionResult> DeleteAditivo(int obraId, int aditivoId)
-    {
-        var result = await _aditivoService.DeleteAditivoAsync(obraId, aditivoId);
-        if (!result) return NotFound();
-
-        return NoContent();
-    }
-
-    // POST: api/obras/5/aditivos/1/upload-anexo
-    [HttpPost("{aditivoId}/upload-anexo")]
-    public async Task<IActionResult> UploadAnexo(int obraId, int aditivoId, [FromForm] UploadFileDto model)
-    {
-        var filePath = await _aditivoService.UploadAnexoAsync(obraId, aditivoId, model);
-        if (filePath == null) return NotFound("Aditivo não encontrado.");
-        if (filePath.StartsWith("Nenhum arquivo") || filePath.StartsWith("Tipo de arquivo") || filePath.StartsWith("Tamanho do arquivo"))
+        public AditivosController(IAditivoService aditivoService)
         {
-            return BadRequest(filePath);
+            _aditivoService = aditivoService;
         }
 
-        return Ok(new { message = "Anexo enviado com sucesso!", filePath = filePath });
-    }
+        // GET: api/obras/{obraId}/Aditivos
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<AditivoListagemDto>>> GetAditivos(int obraId)
+        {
+            var aditivos = await _aditivoService.ObterTodosAditivosAsync(obraId);
+            return Ok(aditivos);
+        }
 
-    // POST: api/obras/5/aditivos/1/aprovar
-    [HttpPost("{aditivoId}/aprovar")]
-    [Authorize(Roles = "Administrador,Coordenador")] // RN001: Apenas Admin ou Coordenador pode aprovar
-    public async Task<IActionResult> AprovarAditivo(int obraId, int aditivoId, [FromBody] AprovarAditivoDto model)
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (userId == null) return Unauthorized();
+        // GET: api/obras/{obraId}/Aditivos/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<AditivoDetalhesDto>> GetAditivo(int id)
+        {
+            var aditivo = await _aditivoService.ObterAditivoPorIdAsync(id);
+            if (aditivo == null)
+            {
+                return NotFound(new { Message = "Aditivo não encontrado." });
+            }
+            return Ok(aditivo);
+        }
 
-        var result = await _aditivoService.AprovarAditivoAsync(obraId, aditivoId, model, userId);
-        if (result == null) return NotFound("Aditivo não encontrado.");
-        if (result != "OK") return BadRequest(result);
+        // POST: api/obras/{obraId}/Aditivos
+        [HttpPost]
+        public async Task<ActionResult<AditivoDetalhesDto>> PostAditivo(int obraId, [FromBody] AditivoCriacaoDto aditivoDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-        return Ok(new { message = $"Aditivo {(model.Aprovar ? "aprovado" : "reprovado")} com sucesso!" });
+            if (obraId != aditivoDto.ObraId)
+            {
+                return BadRequest(new { Message = "O ID da obra na rota não corresponde ao ID da obra no corpo da requisição." });
+            }
+
+            try
+            {
+                var aditivoCriado = await _aditivoService.CriarAditivoAsync(aditivoDto);
+                return CreatedAtAction(nameof(GetAditivo), new { obraId = aditivoCriado.ObraId, id = aditivoCriado.Id }, aditivoCriado);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+        // PUT: api/obras/{obraId}/Aditivos/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutAditivo(int id, [FromBody] AditivoAtualizacaoDto aditivoDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var aditivoAtualizado = await _aditivoService.AtualizarAditivoAsync(id, aditivoDto);
+            if (aditivoAtualizado == null)
+            {
+                return NotFound(new { Message = "Aditivo não encontrado." });
+            }
+            return Ok(aditivoAtualizado);
+        }
+
+        // DELETE: api/obras/{obraId}/Aditivos/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteAditivo(int id)
+        {
+            var result = await _aditivoService.ExcluirAditivoAsync(id);
+            if (!result)
+            {
+                return NotFound(new { Message = "Aditivo não encontrado." });
+            }
+            return NoContent();
+        }
     }
 }

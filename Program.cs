@@ -53,10 +53,8 @@ builder.Services.AddScoped<IDocumentoService, DocumentoService>();
 builder.Services.AddScoped<IManutencaoService, ManutencaoService>();
 builder.Services.AddScoped<IAditivoService, AditivoService>();
 builder.Services.AddScoped<IChecklistService, ChecklistService>();
-builder.Services.AddScoped<IComentarioService, ComentarioService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IAdminService, AdminService>();
 
 // 4. Configure Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();

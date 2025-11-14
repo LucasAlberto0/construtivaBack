@@ -1,19 +1,24 @@
-
+using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace construtivaBack.Models;
-
-public class Comentario
+namespace construtivaBack.Models
 {
-    public int Id { get; set; }
-    public int ObraId { get; set; }
-    public string UserId { get; set; } = string.Empty;
-
-    [Required]
-    public string Texto { get; set; } = string.Empty;
-    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
-
-    // Navigation Properties
-    public virtual Obra? Obra { get; set; }
-    public virtual ApplicationUser? User { get; set; }
+    public class Comentario
+    {
+        [Key]
+        public int Id { get; set; }
+        [Required]
+        public string Texto { get; set; }
+        public DateTime Data { get; set; }
+        
+        [Required]
+        public string AutorId { get; set; }
+        [ForeignKey("AutorId")]
+        public virtual ApplicationUser Autor { get; set; }
+        
+        public int? DiarioObraId { get; set; }
+        [ForeignKey("DiarioObraId")]
+        public virtual DiarioObra? DiarioObra { get; set; }
+    }
 }

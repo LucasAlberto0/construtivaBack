@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/alberto/Documents/construtiva/construtivaBack/construtivaBack.csproj": {}
+    "/Users/alberto/Documents/construtivaBack/construtivaBack.csproj": {}
   },
   "projects": {
-    "/Users/alberto/Documents/construtiva/construtivaBack/construtivaBack.csproj": {
+    "/Users/alberto/Documents/construtivaBack/construtivaBack.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/alberto/Documents/construtiva/construtivaBack/construtivaBack.csproj",
+        "projectUniqueName": "/Users/alberto/Documents/construtivaBack/construtivaBack.csproj",
         "projectName": "construtivaBack",
-        "projectPath": "/Users/alberto/Documents/construtiva/construtivaBack/construtivaBack.csproj",
+        "projectPath": "/Users/alberto/Documents/construtivaBack/construtivaBack.csproj",
         "packagesPath": "/Users/alberto/.nuget/packages/",
-        "outputPath": "/Users/alberto/Documents/construtiva/construtivaBack/obj/",
+        "outputPath": "/Users/alberto/Documents/construtivaBack/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/alberto/.nuget/NuGet/NuGet.Config"

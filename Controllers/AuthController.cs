@@ -24,20 +24,37 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDto model)
     {
-        var result = await _authService.RegisterUserAsync(model);
-        if (!result.Succeeded)
-            return StatusCode(StatusCodes.Status500InternalServerError, new { Status = "Error", Message = "User creation failed! Please check user details and try again.", Errors = result.Errors });
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
 
-        return Ok(new { Status = "Success", Message = "User created successfully!" });
+        var result = await _authService.RegisterUserAsync(model);
+
+        if (!result.Succeeded)
+        {
+            if (result.Errors.Any(e => e.Code == "DuplicateEmail"))
+            {
+                return Conflict(new { Message = result.Errors.First().Description });
+            }
+            return BadRequest(new { Message = "Erro ao registrar usuário.", Errors = result.Errors });
+        }
+
+        return Ok(new { Status = "Success", Message = "Usuário criado com sucesso!" });
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto model)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         var userToken = await _authService.LoginUserAsync(model);
         if (userToken == null)
         {
-            return Unauthorized();
+            return Unauthorized(new { Message = "Email ou senha inválidos." });
         }
         return Ok(userToken);
     }

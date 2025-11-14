@@ -1,77 +1,89 @@
-using construtivaBack.Data;
 using construtivaBack.DTOs;
-using construtivaBack.Models;
 using construtivaBack.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System.Security.Claims; // Adicionado para Claims
 
-namespace construtivaBack.Controllers;
-
-[Authorize] // Protege todos os endpoints neste controller
-[Route("api/[controller]")]
-[ApiController]
-public class ObrasController : ControllerBase
+namespace construtivaBack.Controllers
 {
-    private readonly IObraService _obraService;
-
-    public ObrasController(IObraService obraService)
+    [Route("api/[controller]")]
+    [ApiController]
+    [Authorize] // Protege todos os endpoints deste controller
+    public class ObrasController : ControllerBase
     {
-        _obraService = obraService;
-    }
+        private readonly IObraService _obraService;
 
-    // GET: api/Obras
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<ObraDto>>> GetObras()
-    {
-        var obras = await _obraService.GetAllObrasAsync();
-        return Ok(obras);
-    }
-
-    // GET: api/Obras/5
-    [HttpGet("{id}")]
-    public async Task<ActionResult<ObraDto>> GetObra(int id)
-    {
-        var obra = await _obraService.GetObraByIdAsync(id);
-
-        if (obra == null)
+        public ObrasController(IObraService obraService)
         {
-            return NotFound();
+            _obraService = obraService;
         }
 
-        return obra;
-    }
-
-    // POST: api/Obras
-    [HttpPost]
-    public async Task<ActionResult<ObraDto>> PostObra(CreateObraDto createObraDto)
-    {
-        var obraDto = await _obraService.CreateObraAsync(createObraDto);
-        return CreatedAtAction(nameof(GetObra), new { id = obraDto.Id }, obraDto);
-    }
-
-    // PUT: api/Obras/5
-    [HttpPut("{id}")]
-    public async Task<IActionResult> PutObra(int id, CreateObraDto updateObraDto)
-    {
-        var result = await _obraService.UpdateObraAsync(id, updateObraDto);
-        if (!result)
+        // GET: api/Obras
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<ObraListagemDto>>> GetObras()
         {
-            return NotFound();
+            var obras = await _obraService.ObterTodasObrasAsync();
+            return Ok(obras);
         }
-        return NoContent();
-    }
 
-    // DELETE: api/Obras/5
-    [HttpDelete("{id}")]
-    [Authorize(Roles = "Administrador")]
-    public async Task<IActionResult> DeleteObra(int id)
-    {
-        var result = await _obraService.DeleteObraAsync(id);
-        if (!result)
+        // GET: api/Obras/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ObraDetalhesDto>> GetObra(int id)
         {
-            return NotFound();
+            var obra = await _obraService.ObterObraPorIdAsync(id);
+            if (obra == null)
+            {
+                return NotFound(new { Message = "Obra não encontrada." });
+            }
+            return Ok(obra);
         }
-        return NoContent();
+
+        // POST: api/Obras
+        [HttpPost]
+        public async Task<ActionResult<ObraDetalhesDto>> PostObra([FromBody] ObraCriacaoDto obraDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(new { Message = "Usuário não autenticado." });
+            }
+
+            var obraCriada = await _obraService.CriarObraAsync(obraDto, userId);
+            return CreatedAtAction(nameof(GetObra), new { id = obraCriada.Id }, obraCriada);
+        }
+
+        // PUT: api/Obras/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutObra(int id, [FromBody] ObraAtualizacaoDto obraDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var obraAtualizada = await _obraService.AtualizarObraAsync(id, obraDto);
+            if (obraAtualizada == null)
+            {
+                return NotFound(new { Message = "Obra não encontrada." });
+            }
+            return Ok(obraAtualizada);
+        }
+
+        // DELETE: api/Obras/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteObra(int id)
+        {
+            var result = await _obraService.ExcluirObraAsync(id);
+            if (!result)
+            {
+                return NotFound(new { Message = "Obra não encontrada." });
+            }
+            return NoContent();
+        }
     }
 }

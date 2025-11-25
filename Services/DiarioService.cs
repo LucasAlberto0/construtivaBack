@@ -60,7 +60,7 @@ namespace construtivaBack.Services
 
             var diario = new DiarioObra
             {
-                Data = diarioDto.Data,
+                Data = DateTime.SpecifyKind(diarioDto.Data, DateTimeKind.Utc),
                 Clima = diarioDto.Clima,
                 Colaboradores = diarioDto.Colaboradores,
                 Atividades = diarioDto.Atividades,
@@ -87,7 +87,7 @@ namespace construtivaBack.Services
                     {
                         throw new ArgumentException($"Autor com ID {comentarioDto.AutorId} não encontrado.");
                     }
-                    diario.Comentarios.Add(new Comentario { Texto = comentarioDto.Texto, Data = DateTime.Now, AutorId = comentarioDto.AutorId, DiarioObraId = diario.Id });
+                    diario.Comentarios.Add(new Comentario { Texto = comentarioDto.Texto, Data = DateTime.UtcNow, AutorId = comentarioDto.AutorId, DiarioObraId = diario.Id });
                 }
             }
 
@@ -110,7 +110,7 @@ namespace construtivaBack.Services
                 return null;
             }
 
-            diario.Data = diarioDto.Data;
+            diario.Data = DateTime.SpecifyKind(diarioDto.Data, DateTimeKind.Utc);
             diario.Clima = diarioDto.Clima;
             diario.Colaboradores = diarioDto.Colaboradores;
             diario.Atividades = diarioDto.Atividades;
@@ -180,7 +180,7 @@ namespace construtivaBack.Services
                 throw new ArgumentException($"Autor com ID {comentarioDto.AutorId} não encontrado.");
             }
 
-            var comentario = new Comentario { Texto = comentarioDto.Texto, Data = DateTime.Now, AutorId = comentarioDto.AutorId, DiarioObraId = diarioId };
+            var comentario = new Comentario { Texto = comentarioDto.Texto, Data = DateTime.UtcNow, AutorId = comentarioDto.AutorId, DiarioObraId = diarioId };
             diario.Comentarios.Add(comentario);
             await _context.SaveChangesAsync();
 

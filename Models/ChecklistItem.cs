@@ -7,7 +7,7 @@ namespace construtivaBack.Models
     {
         [Key]
         public int Id { get; set; }
-        public string Nome { get; set; } // e.g., "ART / RRT"
+        public string Nome { get; set; } 
         public bool Concluido { get; set; }
         public string? Observacao { get; set; }
         

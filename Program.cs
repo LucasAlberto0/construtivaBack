@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using construtivaBack.Services;
+using construtivaBack.Identity; // Add this line
 
 var builder = WebApplication.CreateBuilder(args);
 var Configuration = builder.Configuration;
@@ -20,7 +21,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // 2. Configure ASP.NET Core Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
+    .AddDefaultTokenProviders()
+    .AddErrorDescriber<CustomIdentityErrorDescriber>(); // Add this line
 
 // 3. Configure JWT Authentication
 builder.Services.AddAuthentication(options =>

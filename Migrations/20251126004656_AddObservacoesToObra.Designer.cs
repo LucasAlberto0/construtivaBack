@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using construtivaBack.Data;
@@ -11,9 +12,11 @@ using construtivaBack.Data;
 namespace construtivaBack.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251126004656_AddObservacoesToObra")]
+    partial class AddObservacoesToObra
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -445,7 +448,7 @@ namespace construtivaBack.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AdministradorNome")
+                    b.Property<string>("AdministradorId")
                         .HasColumnType("text");
 
                     b.Property<string>("Contratante")
@@ -486,6 +489,8 @@ namespace construtivaBack.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AdministradorId");
 
                     b.ToTable("Obras");
                 });
@@ -633,6 +638,15 @@ namespace construtivaBack.Migrations
                         .IsRequired();
 
                     b.Navigation("Obra");
+                });
+
+            modelBuilder.Entity("construtivaBack.Models.Obra", b =>
+                {
+                    b.HasOne("construtivaBack.Models.ApplicationUser", "Administrador")
+                        .WithMany()
+                        .HasForeignKey("AdministradorId");
+
+                    b.Navigation("Administrador");
                 });
 
             modelBuilder.Entity("construtivaBack.Models.Checklist", b =>

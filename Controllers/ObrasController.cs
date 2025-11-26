@@ -2,13 +2,15 @@ using construtivaBack.DTOs;
 using construtivaBack.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims; // Adicionado para Claims
+using System.Security.Claims;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace construtivaBack.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize] // Protege todos os endpoints deste controller
+    [Authorize]
     public class ObrasController : ControllerBase
     {
         private readonly IObraService _obraService;
@@ -18,72 +20,70 @@ namespace construtivaBack.Controllers
             _obraService = obraService;
         }
 
-        // GET: api/Obras
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ObraListagemDto>>> GetObras()
+        public async Task<ActionResult<ApiResponse<IEnumerable<ObraListagemDto>>>> GetObras()
         {
             var obras = await _obraService.ObterTodasObrasAsync();
-            return Ok(obras);
+            return Ok(ApiResponse<IEnumerable<ObraListagemDto>>.CreateSuccess(obras, "Obras listadas com sucesso."));
         }
 
-        // GET: api/Obras/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ObraDetalhesDto>> GetObra(int id)
+        public async Task<ActionResult<ApiResponse<ObraDetalhesDto>>> GetObra(int id)
         {
             var obra = await _obraService.ObterObraPorIdAsync(id);
             if (obra == null)
             {
-                return NotFound(new { Message = "Obra não encontrada." });
+                return NotFound(ApiResponse<ObraDetalhesDto>.CreateError("Obra não encontrada."));
             }
-            return Ok(obra);
+            return Ok(ApiResponse<ObraDetalhesDto>.CreateSuccess(obra, "Obra encontrada com sucesso."));
         }
 
-        // POST: api/Obras
         [HttpPost]
-        public async Task<ActionResult<ObraDetalhesDto>> PostObra([FromBody] ObraCriacaoDto obraDto)
+        public async Task<ActionResult<ApiResponse<ObraDetalhesDto>>> PostObra([FromBody] ObraCriacaoDto obraDto)
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                return BadRequest(ApiResponse<ObraDetalhesDto>.CreateError("Erro de validação.", errors));
             }
 
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId))
             {
-                return Unauthorized(new { Message = "Usuário não autenticado." });
+                return Unauthorized(ApiResponse<ObraDetalhesDto>.CreateError("Usuário não autenticado."));
             }
 
             var obraCriada = await _obraService.CriarObraAsync(obraDto, userId);
-            return CreatedAtAction(nameof(GetObra), new { id = obraCriada.Id }, obraCriada);
+            var response = ApiResponse<ObraDetalhesDto>.CreateSuccess(obraCriada, "Obra criada com sucesso.");
+            return CreatedAtAction(nameof(GetObra), new { id = obraCriada.Id }, response);
         }
 
-        // PUT: api/Obras/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutObra(int id, [FromBody] ObraAtualizacaoDto obraDto)
+        public async Task<ActionResult<ApiResponse<ObraDetalhesDto>>> PutObra(int id, [FromBody] ObraAtualizacaoDto obraDto)
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                return BadRequest(ApiResponse<ObraDetalhesDto>.CreateError("Erro de validação.", errors));
             }
 
             var obraAtualizada = await _obraService.AtualizarObraAsync(id, obraDto);
             if (obraAtualizada == null)
             {
-                return NotFound(new { Message = "Obra não encontrada." });
+                return NotFound(ApiResponse<ObraDetalhesDto>.CreateError("Obra não encontrada para atualização."));
             }
-            return Ok(obraAtualizada);
+            return Ok(ApiResponse<ObraDetalhesDto>.CreateSuccess(obraAtualizada, "Obra atualizada com sucesso."));
         }
 
-        // DELETE: api/Obras/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteObra(int id)
+        public async Task<ActionResult<ApiResponse<object>>> DeleteObra(int id)
         {
             var result = await _obraService.ExcluirObraAsync(id);
             if (!result)
             {
-                return NotFound(new { Message = "Obra não encontrada." });
+                return NotFound(ApiResponse<object>.CreateError("Obra não encontrada para exclusão."));
             }
-            return NoContent();
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Obra excluída com sucesso."));
         }
     }
 }

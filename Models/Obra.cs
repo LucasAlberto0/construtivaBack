@@ -27,10 +27,7 @@ namespace construtivaBack.Models
 
         // Responsáveis
         public string? CoordenadorNome { get; set; }
-
-        public string? AdministradorId { get; set; }
-        public virtual ApplicationUser? Administrador { get; set; }
-
+        public string? AdministradorNome { get; set; }
         public string? ResponsavelTecnicoNome { get; set; }
 
         public string? Equipe { get; set; }
@@ -39,6 +36,7 @@ namespace construtivaBack.Models
         public DateTime? DataInicio { get; set; }
         public DateTime? DataTermino { get; set; }
         public ObraStatus Status { get; set; } = ObraStatus.EmAndamento;
+        public string? Observacoes { get; set; }
 
         // Navigation properties
         public virtual ICollection<Aditivo> Aditivos { get; set; } = new List<Aditivo>();

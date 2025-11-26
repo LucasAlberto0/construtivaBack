@@ -1,7 +1,6 @@
 using construtivaBack.Data;
 using construtivaBack.DTOs;
 using construtivaBack.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace construtivaBack.Services
@@ -9,12 +8,10 @@ namespace construtivaBack.Services
     public class ObraService : IObraService
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<ApplicationUser> _userManager;
 
-        public ObraService(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public ObraService(ApplicationDbContext context)
         {
             _context = context;
-            _userManager = userManager;
         }
 
         public async Task<IEnumerable<ObraListagemDto>> ObterTodasObrasAsync()
@@ -35,7 +32,6 @@ namespace construtivaBack.Services
         public async Task<ObraDetalhesDto?> ObterObraPorIdAsync(int id)
         {
             var obra = await _context.Obras
-                .Include(o => o.Administrador)
                 .Include(o => o.Aditivos)
                 .Include(o => o.Manutencoes)
                 .Include(o => o.DiariosObra)
@@ -66,20 +62,17 @@ namespace construtivaBack.Services
                 Contrato = obraDto.Contrato,
                 OrdemInicioServico = obraDto.OrdemInicioServico,
                 CoordenadorNome = obraDto.CoordenadorNome,
-                AdministradorId = userId, // Atribui o ID do usuário logado
+                AdministradorNome = obraDto.AdministradorNome,
                 ResponsavelTecnicoNome = obraDto.ResponsavelTecnicoNome,
                 Equipe = obraDto.Equipe,
                 DataInicio = obraDto.DataInicio,
                 DataTermino = obraDto.DataTermino,
-                Status = obraDto.Status
+                Status = obraDto.Status,
+                Observacoes = obraDto.Observacoes
             };
 
             _context.Obras.Add(obra);
             await _context.SaveChangesAsync();
-
-            // Carregar dados relacionados para o DTO de retorno
-            await _context.Entry(obra)
-                .Reference(o => o.Administrador).LoadAsync();
 
             return MapearParaObraDetalhesDto(obra);
         }
@@ -99,19 +92,16 @@ namespace construtivaBack.Services
             obra.Contrato = obraDto.Contrato;
             obra.OrdemInicioServico = obraDto.OrdemInicioServico;
             obra.CoordenadorNome = obraDto.CoordenadorNome;
-            obra.AdministradorId = obraDto.AdministradorId;
+            obra.AdministradorNome = obraDto.AdministradorNome;
             obra.ResponsavelTecnicoNome = obraDto.ResponsavelTecnicoNome;
             obra.Equipe = obraDto.Equipe;
             obra.DataInicio = obraDto.DataInicio;
             obra.DataTermino = obraDto.DataTermino;
             obra.Status = obraDto.Status;
+            obra.Observacoes = obraDto.Observacoes;
 
             _context.Obras.Update(obra);
             await _context.SaveChangesAsync();
-
-            // Carregar dados relacionados para o DTO de retorno
-            await _context.Entry(obra)
-                .Reference(o => o.Administrador).LoadAsync();
 
             return MapearParaObraDetalhesDto(obra);
         }
@@ -140,12 +130,13 @@ namespace construtivaBack.Services
                 Contrato = obra.Contrato,
                 OrdemInicioServico = obra.OrdemInicioServico,
                 CoordenadorNome = obra.CoordenadorNome,
-                AdministradorNome = obra.Administrador?.NomeCompleto ?? obra.Administrador?.UserName,
+                AdministradorNome = obra.AdministradorNome,
                 ResponsavelTecnicoNome = obra.ResponsavelTecnicoNome,
                 Equipe = obra.Equipe,
                 DataInicio = obra.DataInicio,
                 DataTermino = obra.DataTermino,
                 Status = obra.Status,
+                Observacoes = obra.Observacoes,
                 Aditivos = obra.Aditivos?.Select(a => new AditivoDto
                 {
                     Id = a.Id,

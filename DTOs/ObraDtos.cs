@@ -15,11 +15,13 @@ namespace construtivaBack.DTOs
         public string? Contrato { get; set; }
         public string? OrdemInicioServico { get; set; }
         public string? CoordenadorNome { get; set; }
+        public string? AdministradorNome { get; set; }
         public string? ResponsavelTecnicoNome { get; set; }
         public string? Equipe { get; set; }
         public DateTime? DataInicio { get; set; }
         public DateTime? DataTermino { get; set; }
         public ObraStatus Status { get; set; } = ObraStatus.EmAndamento;
+        public string? Observacoes { get; set; }
     }
 
     // DTO para atualização de uma Obra existente
@@ -32,12 +34,13 @@ namespace construtivaBack.DTOs
         public string? Contrato { get; set; }
         public string? OrdemInicioServico { get; set; }
         public string? CoordenadorNome { get; set; }
-        public string? AdministradorId { get; set; }
+        public string? AdministradorNome { get; set; }
         public string? ResponsavelTecnicoNome { get; set; }
         public string? Equipe { get; set; }
         public DateTime? DataInicio { get; set; }
         public DateTime? DataTermino { get; set; }
         public ObraStatus Status { get; set; }
+        public string? Observacoes { get; set; }
     }
 
     // DTO para exibição de detalhes de uma Obra
@@ -56,6 +59,7 @@ namespace construtivaBack.DTOs
         public DateTime? DataInicio { get; set; }
         public DateTime? DataTermino { get; set; }
         public ObraStatus Status { get; set; }
+        public string? Observacoes { get; set; }
         public ICollection<AditivoDto>? Aditivos { get; set; }
         public ICollection<ManutencaoDto>? Manutencoes { get; set; }
         public ICollection<DiarioObraDto>? DiariosObra { get; set; }

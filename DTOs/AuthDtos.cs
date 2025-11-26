@@ -18,6 +18,10 @@ public class RegisterDto
     public string ConfirmPassword { get; set; } = string.Empty;
 
     public string? NomeCompleto { get; set; }
+
+    [Required(ErrorMessage = "O campo Perfil é obrigatório.")]
+    [RegularExpression("^(Admin|Coordenador|Fiscal)$", ErrorMessage = "O perfil deve ser 'Admin', 'Coordenador' ou 'Fiscal'.")]
+    public string Role { get; set; } = string.Empty;
 }
 
 public class LoginDto

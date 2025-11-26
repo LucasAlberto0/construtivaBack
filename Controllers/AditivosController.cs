@@ -39,6 +39,7 @@ namespace construtivaBack.Controllers
 
         // POST: api/obras/{obraId}/Aditivos
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<AditivoDetalhesDto>> PostAditivo(int obraId, [FromBody] AditivoCriacaoDto aditivoDto)
         {
             if (!ModelState.IsValid)
@@ -64,6 +65,7 @@ namespace construtivaBack.Controllers
 
         // PUT: api/obras/{obraId}/Aditivos/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutAditivo(int id, [FromBody] AditivoAtualizacaoDto aditivoDto)
         {
             if (!ModelState.IsValid)
@@ -81,6 +83,7 @@ namespace construtivaBack.Controllers
 
         // DELETE: api/obras/{obraId}/Aditivos/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteAditivo(int id)
         {
             var result = await _aditivoService.ExcluirAditivoAsync(id);

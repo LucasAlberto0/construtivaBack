@@ -39,6 +39,7 @@ namespace construtivaBack.Controllers
 
         // POST: api/obras/{obraId}/Checklists
         [HttpPost]
+        [Authorize(Roles = "Admin,Coordenador")]
         public async Task<ActionResult<ChecklistDetalhesDto>> PostChecklist(int obraId, [FromBody] ChecklistCriacaoDto checklistDto)
         {
             if (!ModelState.IsValid)
@@ -64,6 +65,7 @@ namespace construtivaBack.Controllers
 
         // PUT: api/obras/{obraId}/Checklists/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Coordenador")]
         public async Task<IActionResult> PutChecklist(int id, [FromBody] ChecklistAtualizacaoDto checklistDto)
         {
             if (!ModelState.IsValid)
@@ -81,6 +83,7 @@ namespace construtivaBack.Controllers
 
         // DELETE: api/obras/{obraId}/Checklists/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin,Coordenador")]
         public async Task<IActionResult> DeleteChecklist(int id)
         {
             var result = await _checklistService.ExcluirChecklistAsync(id);
@@ -93,6 +96,7 @@ namespace construtivaBack.Controllers
 
         // POST: api/obras/{obraId}/Checklists/{checklistId}/itens
         [HttpPost("{checklistId}/itens")]
+        [Authorize(Roles = "Admin,Coordenador")]
         public async Task<ActionResult<ChecklistItemDto>> PostChecklistItem(int checklistId, [FromBody] ChecklistItemCriacaoDto itemDto)
         {
             if (!ModelState.IsValid)
@@ -110,6 +114,7 @@ namespace construtivaBack.Controllers
 
         // PUT: api/obras/{obraId}/Checklists/{checklistId}/itens/{itemId}
         [HttpPut("{checklistId}/itens/{itemId}")]
+        [Authorize(Roles = "Admin,Coordenador")]
         public async Task<IActionResult> PutChecklistItem(int itemId, [FromBody] ChecklistItemAtualizacaoDto itemDto)
         {
             if (!ModelState.IsValid)
@@ -132,6 +137,7 @@ namespace construtivaBack.Controllers
 
         // DELETE: api/obras/{obraId}/Checklists/{checklistId}/itens/{itemId}
         [HttpDelete("{checklistId}/itens/{itemId}")]
+        [Authorize(Roles = "Admin,Coordenador")]
         public async Task<IActionResult> DeleteChecklistItem(int itemId)
         {
             var result = await _checklistService.ExcluirItemChecklistAsync(itemId);

@@ -39,6 +39,7 @@ namespace construtivaBack.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin,Coordenador")]
         public async Task<ActionResult<ApiResponse<ObraDetalhesDto>>> PostObra([FromBody] ObraCriacaoDto obraDto)
         {
             if (!ModelState.IsValid)
@@ -59,6 +60,7 @@ namespace construtivaBack.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Coordenador")]
         public async Task<ActionResult<ApiResponse<ObraDetalhesDto>>> PutObra(int id, [FromBody] ObraAtualizacaoDto obraDto)
         {
             if (!ModelState.IsValid)
@@ -76,6 +78,7 @@ namespace construtivaBack.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin,Coordenador")]
         public async Task<ActionResult<ApiResponse<object>>> DeleteObra(int id)
         {
             var result = await _obraService.ExcluirObraAsync(id);

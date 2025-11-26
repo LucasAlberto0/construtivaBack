@@ -39,6 +39,7 @@ namespace construtivaBack.Controllers
 
         // POST: api/obras/{obraId}/Diarios
         [HttpPost]
+        [Authorize(Roles = "Admin,Fiscal")]
         public async Task<ActionResult<DiarioObraDetalhesDto>> PostDiario(int obraId, [FromBody] DiarioObraCriacaoDto diarioDto)
         {
             if (!ModelState.IsValid)
@@ -64,6 +65,7 @@ namespace construtivaBack.Controllers
 
         // PUT: api/obras/{obraId}/Diarios/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Fiscal")]
         public async Task<IActionResult> PutDiario(int id, [FromBody] DiarioObraAtualizacaoDto diarioDto)
         {
             if (!ModelState.IsValid)
@@ -81,6 +83,7 @@ namespace construtivaBack.Controllers
 
         // DELETE: api/obras/{obraId}/Diarios/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin,Fiscal")]
         public async Task<IActionResult> DeleteDiario(int id)
         {
             var result = await _diarioService.ExcluirDiarioAsync(id);
@@ -93,6 +96,7 @@ namespace construtivaBack.Controllers
 
         // POST: api/obras/{obraId}/Diarios/{diarioId}/fotos
         [HttpPost("{diarioId}/fotos")]
+        [Authorize(Roles = "Admin,Fiscal")]
         public async Task<ActionResult<FotoDiarioDto>> AdicionarFoto(int diarioId, [FromBody] string urlFoto)
         {
             var foto = await _diarioService.AdicionarFotoDiarioAsync(diarioId, urlFoto);
@@ -105,6 +109,7 @@ namespace construtivaBack.Controllers
 
         // DELETE: api/obras/{obraId}/Diarios/{diarioId}/fotos/{fotoId}
         [HttpDelete("{diarioId}/fotos/{fotoId}")]
+        [Authorize(Roles = "Admin,Fiscal")]
         public async Task<IActionResult> RemoverFoto(int fotoId)
         {
             var result = await _diarioService.RemoverFotoDiarioAsync(fotoId);
@@ -117,6 +122,7 @@ namespace construtivaBack.Controllers
 
         // POST: api/obras/{obraId}/Diarios/{diarioId}/comentarios
         [HttpPost("{diarioId}/comentarios")]
+        [Authorize(Roles = "Admin,Fiscal")]
         public async Task<ActionResult<ComentarioDto>> AdicionarComentario(int diarioId, [FromBody] ComentarioCriacaoDto comentarioDto)
         {
             try
@@ -136,6 +142,7 @@ namespace construtivaBack.Controllers
 
         // DELETE: api/obras/{obraId}/Diarios/{diarioId}/comentarios/{comentarioId}
         [HttpDelete("{diarioId}/comentarios/{comentarioId}")]
+        [Authorize(Roles = "Admin,Fiscal")]
         public async Task<IActionResult> RemoverComentario(int comentarioId)
         {
             var result = await _diarioService.RemoverComentarioDiarioAsync(comentarioId);

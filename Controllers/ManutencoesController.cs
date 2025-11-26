@@ -39,6 +39,7 @@ namespace construtivaBack.Controllers
 
         // POST: api/obras/{obraId}/Manutencoes
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ManutencaoDetalhesDto>> PostManutencao(int obraId, [FromBody] ManutencaoCriacaoDto manutencaoDto)
         {
             if (!ModelState.IsValid)
@@ -64,6 +65,7 @@ namespace construtivaBack.Controllers
 
         // PUT: api/obras/{obraId}/Manutencoes/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutManutencao(int id, [FromBody] ManutencaoAtualizacaoDto manutencaoDto)
         {
             if (!ModelState.IsValid)
@@ -81,6 +83,7 @@ namespace construtivaBack.Controllers
 
         // DELETE: api/obras/{obraId}/Manutencoes/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteManutencao(int id)
         {
             var result = await _manutencaoService.ExcluirManutencaoAsync(id);

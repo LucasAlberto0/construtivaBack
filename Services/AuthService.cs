@@ -36,7 +36,21 @@ public class AuthService : IAuthService
             NomeCompleto = model.NomeCompleto
         };
 
-        return await _userManager.CreateAsync(user, model.Password);
+        var createResult = await _userManager.CreateAsync(user, model.Password);
+
+        if (createResult.Succeeded)
+        {
+            // Add user to the specified role
+            var roleResult = await _userManager.AddToRoleAsync(user, model.Role);
+            if (!roleResult.Succeeded)
+            {
+                // If role assignment fails, delete the user to prevent orphaned accounts
+                await _userManager.DeleteAsync(user);
+                return IdentityResult.Failed(new IdentityError { Description = "Falha ao atribuir perfil ao usuário." });
+            }
+        }
+
+        return createResult;
     }
 
     public async Task<UserTokenDto?> LoginUserAsync(LoginDto model)

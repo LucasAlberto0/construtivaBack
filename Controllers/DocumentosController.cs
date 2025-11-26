@@ -39,6 +39,7 @@ namespace construtivaBack.Controllers
 
         // POST: api/obras/{obraId}/Documentos
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<DocumentoDetalhesDto>> PostDocumento(int obraId, [FromBody] DocumentoCriacaoDto documentoDto)
         {
             if (!ModelState.IsValid)
@@ -64,6 +65,7 @@ namespace construtivaBack.Controllers
 
         // PUT: api/obras/{obraId}/Documentos/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutDocumento(int id, [FromBody] DocumentoAtualizacaoDto documentoDto)
         {
             if (!ModelState.IsValid)
@@ -81,6 +83,7 @@ namespace construtivaBack.Controllers
 
         // DELETE: api/obras/{obraId}/Documentos/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteDocumento(int id)
         {
             var result = await _documentoService.ExcluirDocumentoAsync(id);

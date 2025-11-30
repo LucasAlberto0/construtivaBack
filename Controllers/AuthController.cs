@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 using System.Text;
 
 namespace construtivaBack.Controllers;
@@ -57,5 +59,49 @@ public class AuthController : ControllerBase
             return Unauthorized(new { Message = "Email ou senha inválidos." });
         }
         return Ok(userToken);
+    }
+
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<IActionResult> GetMe()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+
+        var userInfo = await _authService.GetUserInfoAsync(userId);
+        if (userInfo == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(userInfo);
+    }
+
+    [Authorize]
+    [HttpPut("me")]
+    public async Task<IActionResult> UpdateMe([FromBody] UpdateUserDto model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+
+        var result = await _authService.UpdateUserAsync(userId, model);
+
+        if (!result.Succeeded)
+        {
+            return BadRequest(result.Errors);
+        }
+
+        return NoContent();
     }
 }

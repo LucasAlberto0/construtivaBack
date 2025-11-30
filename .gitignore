@@ -1,2 +1,5 @@
 [Bb]in/
 [Oo]bj/
+
+# Ignore user-uploaded files
+/wwwroot/uploads/

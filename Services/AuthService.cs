@@ -82,6 +82,65 @@ public class AuthService : IAuthService
         return null;
     }
 
+    public async Task<UserInfoDto?> GetUserInfoAsync(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return null;
+        }
+
+        var roles = await _userManager.GetRolesAsync(user);
+
+        return new UserInfoDto
+        {
+            Id = user.Id,
+            Email = user.Email,
+            NomeCompleto = user.NomeCompleto,
+            ProfilePictureUrl = user.ProfilePictureData != null ? $"/api/users/{user.Id}/profile-picture" : null,
+            Roles = roles
+        };
+    }
+
+    public async Task<IdentityResult> UpdateUserAsync(string userId, UpdateUserDto model)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return IdentityResult.Failed(new IdentityError { Description = "User not found." });
+        }
+
+        if (!string.IsNullOrEmpty(model.Email) && model.Email != user.Email)
+        {
+            var setEmailResult = await _userManager.SetEmailAsync(user, model.Email);
+            if (!setEmailResult.Succeeded) return setEmailResult;
+
+            var setUserNameResult = await _userManager.SetUserNameAsync(user, model.Email);
+            if (!setUserNameResult.Succeeded) return setUserNameResult;
+        }
+
+        if (!string.IsNullOrEmpty(model.NomeCompleto))
+        {
+            user.NomeCompleto = model.NomeCompleto;
+        }
+
+        if (!string.IsNullOrEmpty(model.NewPassword))
+        {
+            if (model.NewPassword != model.ConfirmNewPassword)
+            {
+                return IdentityResult.Failed(new IdentityError { Description = "Passwords do not match." });
+            }
+            var removePasswordResult = await _userManager.RemovePasswordAsync(user);
+            if (!removePasswordResult.Succeeded) return removePasswordResult;
+
+            var addPasswordResult = await _userManager.AddPasswordAsync(user, model.NewPassword);
+            if (!addPasswordResult.Succeeded) return addPasswordResult;
+        }
+
+        var updateResult = await _userManager.UpdateAsync(user);
+        return updateResult;
+    }
+
     private JwtSecurityToken GetToken(List<Claim> authClaims)
     {
         var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));

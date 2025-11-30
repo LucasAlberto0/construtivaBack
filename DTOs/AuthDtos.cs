@@ -1,4 +1,3 @@
-
 using System.ComponentModel.DataAnnotations;
 
 namespace construtivaBack.DTOs;
@@ -38,4 +37,28 @@ public class UserTokenDto
 {
     public string Token { get; set; } = string.Empty;
     public DateTime Expiration { get; set; }
+}
+
+public class UserInfoDto
+{
+    public string Id { get; set; }
+    public string Email { get; set; }
+    public string? NomeCompleto { get; set; }
+    public string? ProfilePictureUrl { get; set; }
+    public IList<string> Roles { get; set; }
+}
+
+public class UpdateUserDto
+{
+    [EmailAddress(ErrorMessage = "O formato do email é inválido.")]
+    public string? Email { get; set; }
+
+    public string? NomeCompleto { get; set; }
+
+    [DataType(DataType.Password)]
+    public string? NewPassword { get; set; }
+
+    [DataType(DataType.Password)]
+    [Compare("NewPassword", ErrorMessage = "As senhas não conferem.")]
+    public string? ConfirmNewPassword { get; set; }
 }

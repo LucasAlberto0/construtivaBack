@@ -107,9 +107,13 @@ namespace construtivaBack.DTOs
     public class DocumentoDto
     {
         public int Id { get; set; }
-        public string NomeArquivo { get; set; }
-        public string Url { get; set; }
-        public TipoPasta Pasta { get; set; }
+        public string Nome { get; set; } // Renamed from NomeArquivo
+        public string Tipo { get; set; } // New
+        public string CaminhoArquivo { get; set; } // Renamed from Url
+        public string? Descricao { get; set; } // New
+        public long TamanhoArquivo { get; set; } // New
+        public DateTime DataAnexamento { get; set; } // New
+        public DateTime DataUpload { get; set; } // Existing
     }
 
     public class ChecklistDto

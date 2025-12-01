@@ -9,5 +9,7 @@ namespace construtivaBack.Services
         Task<DocumentoDetalhesDto> CriarDocumentoAsync(DocumentoCriacaoDto documentoDto);
         Task<DocumentoDetalhesDto?> AtualizarDocumentoAsync(int id, DocumentoAtualizacaoDto documentoDto);
         Task<bool> ExcluirDocumentoAsync(int id);
+        Task<DocumentoDetalhesDto?> AnexarArquivoDocumentoAsync(int id, DocumentoAnexoRequestDto anexoDto);
+        Task<(byte[]? fileContents, string? contentType, string? fileName)> DownloadDocumentoAsync(int id);
     }
 }

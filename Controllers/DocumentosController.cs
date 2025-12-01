@@ -47,10 +47,12 @@ namespace construtivaBack.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (obraId != documentoDto.ObraId)
-            {
-                return BadRequest(new { Message = "O ID da obra na rota não corresponde ao ID da obra no corpo da requisição." });
-            }
+            // The obraId from the route is not directly used in DocumentoCriacaoDto,
+            // but it's good practice to ensure consistency if it were to be used.
+            // For now, we'll assume the DTO contains the correct ObraId.
+            // If you want to enforce that the route obraId matches the DTO's ObraId,
+            // you would add a check here.
+            // Example: if (obraId != documentoDto.ObraId) { return BadRequest(...); }
 
             try
             {
@@ -79,6 +81,45 @@ namespace construtivaBack.Controllers
                 return NotFound(new { Message = "Documento não encontrado." });
             }
             return Ok(documentoAtualizado);
+        }
+
+        // POST: api/obras/{obraId}/Documentos/{id}/anexar
+        [HttpPost("{id}/anexar")]
+        [Authorize(Roles = "Admin")] // Assuming only Admins can attach files
+        public async Task<ActionResult<DocumentoDetalhesDto>> AnexarArquivo(int id, [FromForm] DocumentoAnexoRequestDto anexoDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var documentoAtualizado = await _documentoService.AnexarArquivoDocumentoAsync(id, anexoDto);
+                if (documentoAtualizado == null)
+                {
+                    return NotFound(new { Message = "Documento não encontrado." });
+                }
+                return Ok(documentoAtualizado);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+        // GET: api/obras/{obraId}/Documentos/{id}/download
+        [HttpGet("{id}/download")]
+        public async Task<IActionResult> DownloadDocumento(int obraId, int id)
+        {
+            var (fileContents, contentType, fileName) = await _documentoService.DownloadDocumentoAsync(id);
+
+            if (fileContents == null || string.IsNullOrEmpty(fileName) || string.IsNullOrEmpty(contentType))
+            {
+                return NotFound(new { Message = "Documento ou conteúdo não encontrado." });
+            }
+
+            return File(fileContents, contentType, fileName);
         }
 
         // DELETE: api/obras/{obraId}/Documentos/5

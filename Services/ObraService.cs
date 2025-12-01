@@ -162,9 +162,13 @@ namespace construtivaBack.Services
                 Documentos = obra.Documentos?.Select(doc => new DocumentoDto
                 {
                     Id = doc.Id,
-                    NomeArquivo = doc.NomeArquivo,
-                    Url = doc.Url,
-                    Pasta = doc.Pasta ?? TipoPasta.Outros
+                    Nome = doc.Nome,
+                    Tipo = doc.Tipo,
+                    CaminhoArquivo = doc.CaminhoArquivo,
+                    Descricao = doc.Descricao,
+                    TamanhoArquivo = doc.TamanhoArquivo,
+                    DataAnexamento = doc.DataAnexamento,
+                    DataUpload = doc.DataUpload
                 }).ToList(),
                 Checklists = obra.Checklists?.Select(c => new ChecklistDto
                 {

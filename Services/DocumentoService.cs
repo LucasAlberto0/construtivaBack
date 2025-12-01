@@ -2,6 +2,7 @@ using construtivaBack.Data;
 using construtivaBack.DTOs;
 using construtivaBack.Models;
 using Microsoft.EntityFrameworkCore;
+using System.IO; // Required for Path.GetExtension
 
 namespace construtivaBack.Services
 {
@@ -21,10 +22,14 @@ namespace construtivaBack.Services
                 .Select(d => new DocumentoListagemDto
                 {
                     Id = d.Id,
-                    NomeArquivo = d.NomeArquivo,
-                    Url = d.Url,
-                    Pasta = d.Pasta,
-                    ObraId = d.ObraId
+                    Nome = d.Nome,
+                    Tipo = d.Tipo, // Add Tipo
+                    CaminhoArquivo = d.CaminhoArquivo,
+                    ObraId = d.ObraId,
+                    Descricao = d.Descricao,
+                    TamanhoArquivo = d.TamanhoArquivo,
+                    DataAnexamento = d.DataAnexamento,
+                    DataUpload = d.DataUpload
                 })
                 .ToListAsync();
         }
@@ -53,10 +58,12 @@ namespace construtivaBack.Services
 
             var documento = new Documento
             {
-                NomeArquivo = documentoDto.NomeArquivo,
-                Url = documentoDto.Url,
-                Pasta = documentoDto.Pasta,
-                ObraId = documentoDto.ObraId
+                Nome = documentoDto.Nome,
+                Tipo = documentoDto.Tipo, // Add Tipo
+                CaminhoArquivo = documentoDto.CaminhoArquivo,
+                ObraId = documentoDto.ObraId,
+                Descricao = documentoDto.Descricao,
+                DataUpload = DateTime.UtcNow // Initialize DataUpload
             };
 
             _context.Documentos.Add(documento);
@@ -76,9 +83,10 @@ namespace construtivaBack.Services
                 return null;
             }
 
-            documento.NomeArquivo = documentoDto.NomeArquivo;
-            documento.Url = documentoDto.Url;
-            documento.Pasta = documentoDto.Pasta;
+            documento.Nome = documentoDto.Nome;
+            documento.Tipo = documentoDto.Tipo; // Add Tipo
+            documento.CaminhoArquivo = documentoDto.CaminhoArquivo;
+            documento.Descricao = documentoDto.Descricao;
 
             _context.Documentos.Update(documento);
             await _context.SaveChangesAsync();
@@ -101,16 +109,93 @@ namespace construtivaBack.Services
             return true;
         }
 
+        public async Task<DocumentoDetalhesDto?> AnexarArquivoDocumentoAsync(int id, DocumentoAnexoRequestDto anexoDto)
+        {
+            var documento = await _context.Documentos.FindAsync(id);
+
+            if (documento == null)
+            {
+                return null;
+            }
+
+            if (anexoDto.Arquivo != null && anexoDto.Arquivo.Length > 0)
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    await anexoDto.Arquivo.CopyToAsync(memoryStream);
+                    documento.ConteudoArquivo = memoryStream.ToArray();
+                }
+
+                documento.TamanhoArquivo = anexoDto.Arquivo.Length;
+                documento.DataAnexamento = DateTime.UtcNow;
+                documento.CaminhoArquivo = anexoDto.Arquivo.FileName; // Store original filename
+                documento.Descricao = anexoDto.Descricao ?? documento.Descricao; // Update description if provided
+                documento.Tipo = anexoDto.Tipo ?? documento.Tipo; // Update type if provided
+            }
+
+            _context.Documentos.Update(documento);
+            await _context.SaveChangesAsync();
+
+            await _context.Entry(documento).Reference(d => d.Obra).LoadAsync();
+
+            return MapearParaDocumentoDetalhesDto(documento);
+        }
+
+        public async Task<(byte[]? fileContents, string? contentType, string? fileName)> DownloadDocumentoAsync(int id)
+        {
+            var documento = await _context.Documentos.FindAsync(id);
+
+            if (documento == null || documento.ConteudoArquivo == null)
+            {
+                return (null, null, null);
+            }
+
+            // Determine content type based on file extension
+            string contentType = "application/octet-stream"; // Default
+            if (!string.IsNullOrEmpty(documento.CaminhoArquivo))
+            {
+                var extension = Path.GetExtension(documento.CaminhoArquivo)?.ToLowerInvariant();
+                switch (extension)
+                {
+                    case ".pdf":
+                        contentType = "application/pdf";
+                        break;
+                    case ".doc":
+                    case ".docx":
+                        contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                        break;
+                    case ".xls":
+                    case ".xlsx":
+                        contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                        break;
+                    case ".jpg":
+                    case ".jpeg":
+                        contentType = "image/jpeg";
+                        break;
+                    case ".png":
+                        contentType = "image/png";
+                        break;
+                    // Add more types as needed
+                }
+            }
+
+            return (documento.ConteudoArquivo, contentType, documento.CaminhoArquivo);
+        }
+
         private DocumentoDetalhesDto MapearParaDocumentoDetalhesDto(Documento documento)
         {
             return new DocumentoDetalhesDto
             {
                 Id = documento.Id,
-                NomeArquivo = documento.NomeArquivo,
-                Url = documento.Url,
-                Pasta = documento.Pasta ?? TipoPasta.Outros,
+                Nome = documento.Nome,
+                Tipo = documento.Tipo, // Add Tipo
+                CaminhoArquivo = documento.CaminhoArquivo,
                 ObraId = documento.ObraId,
-                NomeObra = documento.Obra?.Nome
+                NomeObra = documento.Obra?.Nome,
+                Descricao = documento.Descricao,
+                TamanhoArquivo = documento.TamanhoArquivo,
+                DataAnexamento = documento.DataAnexamento,
+                DataUpload = documento.DataUpload
             };
         }
     }

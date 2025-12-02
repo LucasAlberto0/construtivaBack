@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using construtivaBack.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace construtivaBack.DTOs
 {
@@ -10,13 +11,16 @@ namespace construtivaBack.DTOs
     {
         [Required(ErrorMessage = "A data do diário é obrigatória.")]
         public DateTime Data { get; set; }
-        public string? Clima { get; set; }
-        public string? Colaboradores { get; set; }
-        public string? Atividades { get; set; }
+        public Clima Clima { get; set; }
+        [Required(ErrorMessage = "A quantidade de colaboradores é obrigatória.")]
+        public int QuantidadeColaboradores { get; set; }
+        [Required(ErrorMessage = "A descrição das atividades é obrigatória.")]
+        public string DescricaoAtividades { get; set; }
+        public string? Observacoes { get; set; }
         [Required(ErrorMessage = "O ID da obra é obrigatório.")]
         public int ObraId { get; set; }
-        public List<string>? FotosUrls { get; set; } // URLs das fotos a serem adicionadas
-        public List<ComentarioCriacaoDto>? Comentarios { get; set; } // Comentários a serem adicionados
+        public IFormFile? Foto { get; set; }
+        public List<ComentarioCriacaoDto>? Comentarios { get; set; }
     }
 
     // DTO para atualização de um Diário de Obra existente
@@ -24,9 +28,13 @@ namespace construtivaBack.DTOs
     {
         [Required(ErrorMessage = "A data do diário é obrigatória.")]
         public DateTime Data { get; set; }
-        public string? Clima { get; set; }
-        public string? Colaboradores { get; set; }
-        public string? Atividades { get; set; }
+        public Clima Clima { get; set; }
+        [Required(ErrorMessage = "A quantidade de colaboradores é obrigatória.")]
+        public int QuantidadeColaboradores { get; set; }
+        [Required(ErrorMessage = "A descrição das atividades é obrigatória.")]
+        public string DescricaoAtividades { get; set; }
+        public string? Observacoes { get; set; }
+        public IFormFile? Foto { get; set; }
     }
 
     // DTO para exibição de detalhes de um Diário de Obra
@@ -34,12 +42,13 @@ namespace construtivaBack.DTOs
     {
         public int Id { get; set; }
         public DateTime Data { get; set; }
-        public string? Clima { get; set; }
-        public string? Colaboradores { get; set; }
-        public string? Atividades { get; set; }
+        public Clima Clima { get; set; }
+        public int QuantidadeColaboradores { get; set; }
+        public string DescricaoAtividades { get; set; }
+        public string? Observacoes { get; set; }
+        public bool HasFoto { get; set; }
         public int ObraId { get; set; }
         public string? NomeObra { get; set; }
-        public ICollection<FotoDiarioDto>? Fotos { get; set; }
         public ICollection<ComentarioDto>? Comentarios { get; set; }
     }
 
@@ -48,16 +57,9 @@ namespace construtivaBack.DTOs
     {
         public int Id { get; set; }
         public DateTime Data { get; set; }
-        public string? Clima { get; set; }
+        public Clima Clima { get; set; }
         public int ObraId { get; set; }
         public string? NomeObra { get; set; }
-    }
-
-    // DTO para FotoDiario
-    public class FotoDiarioDto
-    {
-        public int Id { get; set; }
-        public string Url { get; set; }
     }
 
     // DTO para criação de Comentário

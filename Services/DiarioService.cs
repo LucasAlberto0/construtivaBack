@@ -3,6 +3,7 @@ using construtivaBack.DTOs;
 using construtivaBack.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.IO;
 
 namespace construtivaBack.Services
 {
@@ -37,7 +38,6 @@ namespace construtivaBack.Services
         {
             var diario = await _context.DiariosDeObra
                 .Include(d => d.Obra)
-                .Include(d => d.Fotos)
                 .Include(d => d.Comentarios)
                     .ThenInclude(c => c.Autor)
                 .FirstOrDefaultAsync(d => d.Id == id);
@@ -62,21 +62,24 @@ namespace construtivaBack.Services
             {
                 Data = DateTime.SpecifyKind(diarioDto.Data, DateTimeKind.Utc),
                 Clima = diarioDto.Clima,
-                Colaboradores = diarioDto.Colaboradores,
-                Atividades = diarioDto.Atividades,
+                QuantidadeColaboradores = diarioDto.QuantidadeColaboradores,
+                DescricaoAtividades = diarioDto.DescricaoAtividades,
+                Observacoes = diarioDto.Observacoes,
                 ObraId = diarioDto.ObraId
             };
 
-            _context.DiariosDeObra.Add(diario);
-            await _context.SaveChangesAsync();
-
-            if (diarioDto.FotosUrls != null && diarioDto.FotosUrls.Any())
+            if (diarioDto.Foto != null)
             {
-                foreach (var url in diarioDto.FotosUrls)
+                using (var memoryStream = new MemoryStream())
                 {
-                    diario.Fotos.Add(new FotoDiario { Url = url, DiarioObraId = diario.Id });
+                    await diarioDto.Foto.CopyToAsync(memoryStream);
+                    diario.Foto = memoryStream.ToArray();
+                    diario.FotoMimeType = diarioDto.Foto.ContentType;
                 }
             }
+
+            _context.DiariosDeObra.Add(diario);
+            await _context.SaveChangesAsync();
 
             if (diarioDto.Comentarios != null && diarioDto.Comentarios.Any())
             {
@@ -89,13 +92,10 @@ namespace construtivaBack.Services
                     }
                     diario.Comentarios.Add(new Comentario { Texto = comentarioDto.Texto, Data = DateTime.UtcNow, AutorId = comentarioDto.AutorId, DiarioObraId = diario.Id });
                 }
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
-
-            // Recarregar para incluir as entidades relacionadas recém-adicionadas
             await _context.Entry(diario).Reference(d => d.Obra).LoadAsync();
-            await _context.Entry(diario).Collection(d => d.Fotos).LoadAsync();
             await _context.Entry(diario).Collection(d => d.Comentarios).Query().Include(c => c.Autor).LoadAsync();
 
             return MapearParaDiarioObraDetalhesDto(diario);
@@ -112,14 +112,24 @@ namespace construtivaBack.Services
 
             diario.Data = DateTime.SpecifyKind(diarioDto.Data, DateTimeKind.Utc);
             diario.Clima = diarioDto.Clima;
-            diario.Colaboradores = diarioDto.Colaboradores;
-            diario.Atividades = diarioDto.Atividades;
+            diario.QuantidadeColaboradores = diarioDto.QuantidadeColaboradores;
+            diario.DescricaoAtividades = diarioDto.DescricaoAtividades;
+            diario.Observacoes = diarioDto.Observacoes;
+
+            if (diarioDto.Foto != null)
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    await diarioDto.Foto.CopyToAsync(memoryStream);
+                    diario.Foto = memoryStream.ToArray();
+                    diario.FotoMimeType = diarioDto.Foto.ContentType;
+                }
+            }
 
             _context.DiariosDeObra.Update(diario);
             await _context.SaveChangesAsync();
 
             await _context.Entry(diario).Reference(d => d.Obra).LoadAsync();
-            await _context.Entry(diario).Collection(d => d.Fotos).LoadAsync();
             await _context.Entry(diario).Collection(d => d.Comentarios).Query().Include(c => c.Autor).LoadAsync();
 
             return MapearParaDiarioObraDetalhesDto(diario);
@@ -138,32 +148,10 @@ namespace construtivaBack.Services
             return true;
         }
 
-        public async Task<FotoDiarioDto?> AdicionarFotoDiarioAsync(int diarioId, string urlFoto)
+        public async Task<(byte[]?, string?)> ObterFotoDiarioAsync(int id)
         {
-            var diario = await _context.DiariosDeObra.Include(d => d.Fotos).FirstOrDefaultAsync(d => d.Id == diarioId);
-            if (diario == null)
-            {
-                return null;
-            }
-
-            var foto = new FotoDiario { Url = urlFoto, DiarioObraId = diarioId };
-            diario.Fotos.Add(foto);
-            await _context.SaveChangesAsync();
-
-            return new FotoDiarioDto { Id = foto.Id, Url = foto.Url };
-        }
-
-        public async Task<bool> RemoverFotoDiarioAsync(int fotoId)
-        {
-            var foto = await _context.FotosDiario.FindAsync(fotoId);
-            if (foto == null)
-            {
-                return false;
-            }
-
-            _context.FotosDiario.Remove(foto);
-            await _context.SaveChangesAsync();
-            return true;
+            var diario = await _context.DiariosDeObra.FindAsync(id);
+            return (diario?.Foto, diario?.FotoMimeType);
         }
 
         public async Task<ComentarioDto?> AdicionarComentarioDiarioAsync(int diarioId, ComentarioCriacaoDto comentarioDto)
@@ -207,11 +195,12 @@ namespace construtivaBack.Services
                 Id = diario.Id,
                 Data = diario.Data,
                 Clima = diario.Clima,
-                Colaboradores = diario.Colaboradores,
-                Atividades = diario.Atividades,
+                QuantidadeColaboradores = diario.QuantidadeColaboradores,
+                DescricaoAtividades = diario.DescricaoAtividades,
+                Observacoes = diario.Observacoes,
+                HasFoto = diario.Foto != null,
                 ObraId = diario.ObraId,
                 NomeObra = diario.Obra?.Nome,
-                Fotos = diario.Fotos?.Select(f => new FotoDiarioDto { Id = f.Id, Url = f.Url }).ToList(),
                 Comentarios = diario.Comentarios?.Select(c => new ComentarioDto
                 {
                     Id = c.Id,

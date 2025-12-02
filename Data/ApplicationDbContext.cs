@@ -20,7 +20,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Checklist> Checklists { get; set; }
     public DbSet<ChecklistItem> ChecklistItens { get; set; }
     public DbSet<Comentario> Comentarios { get; set; }
-    public DbSet<FotoDiario> FotosDiario { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

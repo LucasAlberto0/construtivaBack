@@ -98,9 +98,11 @@ namespace construtivaBack.DTOs
     {
         public int Id { get; set; }
         public DateTime Data { get; set; }
-        public string? Clima { get; set; }
-        public string? Colaboradores { get; set; }
-        public string? Atividades { get; set; }
+        public Clima Clima { get; set; }
+        public int QuantidadeColaboradores { get; set; }
+        public string DescricaoAtividades { get; set; }
+        public string? Observacoes { get; set; }
+        public bool HasFoto { get; set; }
     }
 
     public class DocumentoDto

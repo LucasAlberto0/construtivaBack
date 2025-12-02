@@ -2,6 +2,7 @@ using construtivaBack.DTOs;
 using construtivaBack.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace construtivaBack.Controllers
 {
@@ -37,10 +38,22 @@ namespace construtivaBack.Controllers
             return Ok(diario);
         }
 
+        // GET: api/obras/{obraId}/Diarios/5/foto
+        [HttpGet("{id}/foto")]
+        public async Task<IActionResult> GetDiarioFoto(int id)
+        {
+            var (foto, mimeType) = await _diarioService.ObterFotoDiarioAsync(id);
+            if (foto == null || mimeType == null)
+            {
+                return NotFound();
+            }
+            return File(foto, mimeType);
+        }
+
         // POST: api/obras/{obraId}/Diarios
         [HttpPost]
         [Authorize(Roles = "Admin,Fiscal")]
-        public async Task<ActionResult<DiarioObraDetalhesDto>> PostDiario(int obraId, [FromBody] DiarioObraCriacaoDto diarioDto)
+        public async Task<ActionResult<DiarioObraDetalhesDto>> PostDiario(int obraId, [FromForm] DiarioObraCriacaoDto diarioDto)
         {
             if (!ModelState.IsValid)
             {
@@ -66,7 +79,7 @@ namespace construtivaBack.Controllers
         // PUT: api/obras/{obraId}/Diarios/5
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin,Fiscal")]
-        public async Task<IActionResult> PutDiario(int id, [FromBody] DiarioObraAtualizacaoDto diarioDto)
+        public async Task<IActionResult> PutDiario(int id, [FromForm] DiarioObraAtualizacaoDto diarioDto)
         {
             if (!ModelState.IsValid)
             {
@@ -90,32 +103,6 @@ namespace construtivaBack.Controllers
             if (!result)
             {
                 return NotFound(new { Message = "Diário de Obra não encontrado." });
-            }
-            return NoContent();
-        }
-
-        // POST: api/obras/{obraId}/Diarios/{diarioId}/fotos
-        [HttpPost("{diarioId}/fotos")]
-        [Authorize(Roles = "Admin,Fiscal")]
-        public async Task<ActionResult<FotoDiarioDto>> AdicionarFoto(int diarioId, [FromBody] string urlFoto)
-        {
-            var foto = await _diarioService.AdicionarFotoDiarioAsync(diarioId, urlFoto);
-            if (foto == null)
-            {
-                return NotFound(new { Message = "Diário de Obra não encontrado." });
-            }
-            return CreatedAtAction(nameof(GetDiario), new { id = diarioId }, foto); // Retorna 201 com a foto adicionada
-        }
-
-        // DELETE: api/obras/{obraId}/Diarios/{diarioId}/fotos/{fotoId}
-        [HttpDelete("{diarioId}/fotos/{fotoId}")]
-        [Authorize(Roles = "Admin,Fiscal")]
-        public async Task<IActionResult> RemoverFoto(int fotoId)
-        {
-            var result = await _diarioService.RemoverFotoDiarioAsync(fotoId);
-            if (!result)
-            {
-                return NotFound(new { Message = "Foto não encontrada." });
             }
             return NoContent();
         }

@@ -37,8 +37,6 @@ namespace construtivaBack.Services
                 .Include(o => o.DiariosObra)
                     .ThenInclude(diario => diario.Comentarios)
                         .ThenInclude(c => c.Autor)
-                .Include(o => o.DiariosObra)
-                    .ThenInclude(diario => diario.Fotos)
                 .Include(o => o.Documentos)
                 .Include(o => o.Checklists)
                     .ThenInclude(c => c.Itens)
@@ -155,8 +153,10 @@ namespace construtivaBack.Services
                     Id = d.Id,
                     Data = d.Data,
                     Clima = d.Clima,
-                    Colaboradores = d.Colaboradores,
-                    Atividades = d.Atividades
+                    QuantidadeColaboradores = d.QuantidadeColaboradores,
+                    DescricaoAtividades = d.DescricaoAtividades,
+                    Observacoes = d.Observacoes,
+                    HasFoto = d.Foto != null
                 }).ToList(),
                 Documentos = obra.Documentos?.Select(doc => new DocumentoDto
                 {

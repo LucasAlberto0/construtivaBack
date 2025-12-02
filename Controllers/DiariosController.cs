@@ -3,6 +3,7 @@ using construtivaBack.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using System.Security.Claims; // Added for ClaimTypes
 
 namespace construtivaBack.Controllers
 {
@@ -27,7 +28,7 @@ namespace construtivaBack.Controllers
         }
 
         // GET: api/obras/{obraId}/Diarios/5
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name = "GetDiarioById")] // Added Name property
         public async Task<ActionResult<DiarioObraDetalhesDto>> GetDiario(int id)
         {
             var diario = await _diarioService.ObterDiarioPorIdAsync(id);
@@ -110,16 +111,22 @@ namespace construtivaBack.Controllers
         // POST: api/obras/{obraId}/Diarios/{diarioId}/comentarios
         [HttpPost("{diarioId}/comentarios")]
         [Authorize(Roles = "Admin,Fiscal")]
-        public async Task<ActionResult<ComentarioDto>> AdicionarComentario(int diarioId, [FromBody] ComentarioCriacaoDto comentarioDto)
+        public async Task<ActionResult<ComentarioDto>> AdicionarComentario(int obraId, int diarioId, [FromBody] ComentarioCriacaoDto comentarioDto)
         {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(new { Message = "Usuário não autenticado." });
+            }
+
             try
             {
-                var comentario = await _diarioService.AdicionarComentarioDiarioAsync(diarioId, comentarioDto);
+                var comentario = await _diarioService.AdicionarComentarioDiarioAsync(diarioId, comentarioDto, userId);
                 if (comentario == null)
                 {
                     return NotFound(new { Message = "Diário de Obra não encontrado." });
                 }
-                return CreatedAtAction(nameof(GetDiario), new { id = diarioId }, comentario);
+                return CreatedAtRoute("GetDiarioById", new { obraId = obraId, id = diarioId }, comentario);
             }
             catch (ArgumentException ex)
             {

@@ -12,7 +12,7 @@ namespace construtivaBack.Services
         Task<DiarioObraDetalhesDto?> AtualizarDiarioAsync(int id, DiarioObraAtualizacaoDto diarioDto);
         Task<bool> ExcluirDiarioAsync(int id);
         Task<(byte[]?, string?)> ObterFotoDiarioAsync(int id);
-        Task<ComentarioDto?> AdicionarComentarioDiarioAsync(int diarioId, ComentarioCriacaoDto comentarioDto);
+        Task<ComentarioDto?> AdicionarComentarioDiarioAsync(int diarioId, ComentarioCriacaoDto comentarioDto, string autorId);
         Task<bool> RemoverComentarioDiarioAsync(int comentarioId);
     }
 }

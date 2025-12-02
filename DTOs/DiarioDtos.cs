@@ -67,8 +67,6 @@ namespace construtivaBack.DTOs
     {
         [Required(ErrorMessage = "O texto do comentário é obrigatório.")]
         public string Texto { get; set; }
-        [Required(ErrorMessage = "O ID do autor é obrigatório.")]
-        public string AutorId { get; set; }
     }
 
     // DTO para exibição de Comentário

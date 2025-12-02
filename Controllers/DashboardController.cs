@@ -24,5 +24,13 @@ namespace construtivaBack.Controllers
             var summary = await _dashboardService.ObterResumoDashboardAsync();
             return Ok(summary);
         }
+
+        // GET: api/Dashboard/overall-stats
+        [HttpGet("overall-stats")]
+        public async Task<ActionResult<OverallProjectStatsDto>> GetOverallProjectStats()
+        {
+            var stats = await _dashboardService.GetOverallProjectStatsAsync();
+            return Ok(stats);
+        }
     }
 }

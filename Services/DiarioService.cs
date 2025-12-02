@@ -4,6 +4,7 @@ using construtivaBack.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.IO;
+using System.Security.Claims;
 
 namespace construtivaBack.Services
 {
@@ -81,19 +82,8 @@ namespace construtivaBack.Services
             _context.DiariosDeObra.Add(diario);
             await _context.SaveChangesAsync();
 
-            if (diarioDto.Comentarios != null && diarioDto.Comentarios.Any())
-            {
-                foreach (var comentarioDto in diarioDto.Comentarios)
-                {
-                    var autor = await _userManager.FindByIdAsync(comentarioDto.AutorId);
-                    if (autor == null)
-                    {
-                        throw new ArgumentException($"Autor com ID {comentarioDto.AutorId} não encontrado.");
-                    }
-                    diario.Comentarios.Add(new Comentario { Texto = comentarioDto.Texto, Data = DateTime.UtcNow, AutorId = comentarioDto.AutorId, DiarioObraId = diario.Id });
-                }
-                await _context.SaveChangesAsync();
-            }
+            // Removed the loop for adding comments during diario creation,
+            // as comments should be added via the dedicated endpoint.
 
             await _context.Entry(diario).Reference(d => d.Obra).LoadAsync();
             await _context.Entry(diario).Collection(d => d.Comentarios).Query().Include(c => c.Autor).LoadAsync();
@@ -154,21 +144,24 @@ namespace construtivaBack.Services
             return (diario?.Foto, diario?.FotoMimeType);
         }
 
-        public async Task<ComentarioDto?> AdicionarComentarioDiarioAsync(int diarioId, ComentarioCriacaoDto comentarioDto)
+        public async Task<ComentarioDto?> AdicionarComentarioDiarioAsync(int diarioId, ComentarioCriacaoDto comentarioDto, string autorId)
         {
             var diario = await _context.DiariosDeObra.Include(d => d.Comentarios).FirstOrDefaultAsync(d => d.Id == diarioId);
             if (diario == null)
             {
-                return null;
+                return null; // Diario de Obra not found
             }
 
-            var autor = await _userManager.FindByIdAsync(comentarioDto.AutorId);
+            var autor = await _userManager.FindByIdAsync(autorId);
             if (autor == null)
             {
-                throw new ArgumentException($"Autor com ID {comentarioDto.AutorId} não encontrado.");
+                // This case should ideally not happen if the user is authenticated,
+                // but as a safeguard, we can throw an exception or return null.
+                // For now, let's throw an ArgumentException as it indicates an unexpected state.
+                throw new ArgumentException($"Autor com ID {autorId} não encontrado. O usuário autenticado não foi encontrado no sistema.");
             }
 
-            var comentario = new Comentario { Texto = comentarioDto.Texto, Data = DateTime.UtcNow, AutorId = comentarioDto.AutorId, DiarioObraId = diarioId };
+            var comentario = new Comentario { Texto = comentarioDto.Texto, Data = DateTime.UtcNow, AutorId = autorId, DiarioObraId = diarioId };
             diario.Comentarios.Add(comentario);
             await _context.SaveChangesAsync();
 

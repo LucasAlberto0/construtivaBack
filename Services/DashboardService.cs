@@ -42,5 +42,55 @@ namespace construtivaBack.Services
 
             return summary;
         }
+
+        public async Task<OverallProjectStatsDto> GetOverallProjectStatsAsync()
+        {
+            var allObras = await _context.Obras
+                                        .Include(o => o.Documentos) // Include documents for calculation
+                                        .ToListAsync();
+
+            var stats = new OverallProjectStatsDto
+            {
+                TotalProjects = allObras.Count,
+                ProjectsByStatus = allObras
+                    .GroupBy(o => o.Status.ToString())
+                    .ToDictionary(g => g.Key, g => g.Count()),
+                ProjectsByLocation = allObras
+                    .Where(o => !string.IsNullOrEmpty(o.Localizacao))
+                    .GroupBy(o => o.Localizacao)
+                    .ToDictionary(g => g.Key, g => g.Count()),
+                ProjectsByCoordinator = allObras
+                    .Where(o => !string.IsNullOrEmpty(o.CoordenadorNome))
+                    .GroupBy(o => o.CoordenadorNome)
+                    .ToDictionary(g => g.Key, g => g.Count())
+            };
+
+            // Calculate average project duration for completed projects
+            var completedProjectsWithDates = allObras
+                .Where(o => o.Status == ObraStatus.Finalizado && o.DataInicio.HasValue && o.DataTermino.HasValue)
+                .ToList();
+
+            if (completedProjectsWithDates.Any())
+            {
+                stats.AverageProjectDurationDays = completedProjectsWithDates
+                    .Average(o => (o.DataTermino.Value - o.DataInicio.Value).TotalDays);
+            }
+            else
+            {
+                stats.AverageProjectDurationDays = 0;
+            }
+
+            // Calculate average documents per project
+            if (allObras.Any())
+            {
+                stats.AverageDocumentsPerProject = allObras.Average(o => o.Documentos.Count);
+            }
+            else
+            {
+                stats.AverageDocumentsPerProject = 0;
+            }
+
+            return stats;
+        }
     }
 }

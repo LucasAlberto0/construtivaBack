@@ -27,7 +27,7 @@ namespace construtivaBack.DTOs
     {
         public int Id { get; set; }
         public TipoChecklist Tipo { get; set; }
-        public int ObraId { get; set; }
+        public int? ObraId { get; set; }
         public string? NomeObra { get; set; }
         public ICollection<ChecklistItemDto>? Itens { get; set; }
     }
@@ -37,7 +37,7 @@ namespace construtivaBack.DTOs
     {
         public int Id { get; set; }
         public TipoChecklist Tipo { get; set; }
-        public int ObraId { get; set; }
+        public int? ObraId { get; set; }
         public string? NomeObra { get; set; }
     }
 

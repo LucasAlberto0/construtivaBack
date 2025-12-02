@@ -14,17 +14,27 @@ namespace construtivaBack.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<ChecklistListagemDto>> ObterTodosChecklistsAsync(int obraId)
+        public async Task<IEnumerable<ChecklistListagemDto>> ObterTodosChecklistsAsync(int? obraId)
         {
-            return await _context.Checklists
-                .Where(c => c.ObraId == obraId)
+            var query = _context.Checklists.AsQueryable();
+
+            if (obraId.HasValue)
+            {
+                query = query.Where(c => c.ObraId == obraId.Value);
+            }
+            else
+            {
+                query = query.Where(c => c.ObraId == null);
+            }
+
+            return await query
                 .Include(c => c.Obra)
                 .Select(c => new ChecklistListagemDto
                 {
                     Id = c.Id,
                     Tipo = c.Tipo,
                     ObraId = c.ObraId,
-                    NomeObra = c.Obra.Nome
+                    NomeObra = c.Obra != null ? c.Obra.Nome : null
                 })
                 .ToListAsync();
         }

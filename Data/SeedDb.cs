@@ -1,7 +1,8 @@
 
 using construtivaBack.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection; // Added for IServiceProvider
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection; 
 
 namespace construtivaBack.Data;
 
@@ -11,6 +12,7 @@ public static class SeedDb
     {
         var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
 
         string[] roleNames = { "Admin", "Coordenador", "Fiscal" };
 
@@ -23,7 +25,6 @@ public static class SeedDb
             }
         }
 
-        // Create default admin user
         string adminEmail = "admin@system.com";
         string adminPassword = "Admin@123";
 
@@ -47,11 +48,53 @@ public static class SeedDb
         }
         else
         {
-            // Ensure the existing admin user has the Admin role
             if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
             {
                 await userManager.AddToRoleAsync(adminUser, "Admin");
             }
+        }
+
+        await SeedChecklists(context);
+    }
+
+    private static async Task SeedChecklists(ApplicationDbContext context)
+    {
+        if (!await context.Checklists.AnyAsync())
+        {
+            var inicioObra = new Checklist
+            {
+                Tipo = TipoChecklist.InicioObra,
+                Itens = new List<ChecklistItem>
+                {
+                    new ChecklistItem { Nome = "ART / RRT", Concluido = false },
+                    new ChecklistItem { Nome = "Placa de obra instalada", Concluido = false },
+                    new ChecklistItem { Nome = "EPIs disponíveis", Concluido = false },
+                    new ChecklistItem { Nome = "CIPA constituída", Concluido = false },
+                    new ChecklistItem { Nome = "Alvará de construção", Concluido = false },
+                    new ChecklistItem { Nome = "Procuração e documentos", Concluido = false },
+                    new ChecklistItem { Nome = "Diário de obra iniciado", Concluido = false },
+                    new ChecklistItem { Nome = "Canteiro de obras montado", Concluido = false }
+                }
+            };
+
+            var entregaObra = new Checklist
+            {
+                Tipo = TipoChecklist.EntregaObra,
+                Itens = new List<ChecklistItem>
+                {
+                    new ChecklistItem { Nome = "Limpeza final realizada", Concluido = false },
+                    new ChecklistItem { Nome = "Termos de garantia assinados", Concluido = false },
+                    new ChecklistItem { Nome = "Manuais de equipamentos entregues", Concluido = false },
+                    new ChecklistItem { Nome = "As Built finalizado", Concluido = false },
+                    new ChecklistItem { Nome = "Habite-se obtido", Concluido = false },
+                    new ChecklistItem { Nome = "Jogo de chaves entregue", Concluido = false },
+                    new ChecklistItem { Nome = "Vistoria final aprovada", Concluido = false },
+                    new ChecklistItem { Nome = "Documentação completa arquivada", Concluido = false }
+                }
+            };
+
+            context.Checklists.AddRange(inicioObra, entregaObra);
+            await context.SaveChangesAsync();
         }
     }
 }

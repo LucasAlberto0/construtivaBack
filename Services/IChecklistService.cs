@@ -4,7 +4,7 @@ namespace construtivaBack.Services
 {
     public interface IChecklistService
     {
-        Task<IEnumerable<ChecklistListagemDto>> ObterTodosChecklistsAsync(int obraId);
+        Task<IEnumerable<ChecklistListagemDto>> ObterTodosChecklistsAsync(int? obraId);
         Task<ChecklistDetalhesDto?> ObterChecklistPorIdAsync(int id);
         Task<ChecklistDetalhesDto> CriarChecklistAsync(ChecklistCriacaoDto checklistDto);
         Task<ChecklistDetalhesDto?> AtualizarChecklistAsync(int id, ChecklistAtualizacaoDto checklistDto);

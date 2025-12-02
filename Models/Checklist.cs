@@ -16,9 +16,9 @@ namespace construtivaBack.Models
         public int Id { get; set; }
         public TipoChecklist Tipo { get; set; }
         
-        public int ObraId { get; set; }
+        public int? ObraId { get; set; }
         [ForeignKey("ObraId")]
-        public virtual Obra Obra { get; set; }
+        public virtual Obra? Obra { get; set; }
         
         public virtual ICollection<ChecklistItem> Itens { get; set; } = new List<ChecklistItem>();
     }

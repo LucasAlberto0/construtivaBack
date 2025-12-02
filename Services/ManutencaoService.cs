@@ -2,6 +2,7 @@ using construtivaBack.Data;
 using construtivaBack.DTOs;
 using construtivaBack.Models;
 using Microsoft.EntityFrameworkCore;
+using System.IO;
 
 namespace construtivaBack.Services
 {
@@ -22,8 +23,9 @@ namespace construtivaBack.Services
                 .Select(m => new ManutencaoListagemDto
                 {
                     Id = m.Id,
-                    DataInicio = m.DataInicio,
-                    DataTermino = m.DataTermino,
+                    DataManutencao = m.DataManutencao,
+                    Descricao = m.Descricao,
+                    HasFoto = m.Foto != null,
                     ObraId = m.ObraId,
                     NomeObra = m.Obra.Nome
                 })
@@ -54,12 +56,20 @@ namespace construtivaBack.Services
 
             var manutencao = new Manutencao
             {
-                DataInicio = manutencaoDto.DataInicio,
-                DataTermino = manutencaoDto.DataTermino,
-                ImagemUrl = manutencaoDto.ImagemUrl,
-                DatasManutencao = manutencaoDto.DatasManutencao,
+                DataManutencao = DateTime.SpecifyKind(manutencaoDto.DataManutencao, DateTimeKind.Utc),
+                Descricao = manutencaoDto.Descricao,
                 ObraId = manutencaoDto.ObraId
             };
+
+            if (manutencaoDto.Foto != null)
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    await manutencaoDto.Foto.CopyToAsync(memoryStream);
+                    manutencao.Foto = memoryStream.ToArray();
+                    manutencao.FotoMimeType = manutencaoDto.Foto.ContentType;
+                }
+            }
 
             _context.Manutencoes.Add(manutencao);
             await _context.SaveChangesAsync();
@@ -78,10 +88,18 @@ namespace construtivaBack.Services
                 return null;
             }
 
-            manutencao.DataInicio = manutencaoDto.DataInicio;
-            manutencao.DataTermino = manutencaoDto.DataTermino;
-            manutencao.ImagemUrl = manutencaoDto.ImagemUrl;
-            manutencao.DatasManutencao = manutencaoDto.DatasManutencao;
+            manutencao.DataManutencao = DateTime.SpecifyKind(manutencaoDto.DataManutencao, DateTimeKind.Utc);
+            manutencao.Descricao = manutencaoDto.Descricao;
+
+            if (manutencaoDto.Foto != null)
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    await manutencaoDto.Foto.CopyToAsync(memoryStream);
+                    manutencao.Foto = memoryStream.ToArray();
+                    manutencao.FotoMimeType = manutencaoDto.Foto.ContentType;
+                }
+            }
 
             _context.Manutencoes.Update(manutencao);
             await _context.SaveChangesAsync();
@@ -104,15 +122,20 @@ namespace construtivaBack.Services
             return true;
         }
 
+        public async Task<(byte[]?, string?)> ObterFotoManutencaoAsync(int id)
+        {
+            var manutencao = await _context.Manutencoes.FindAsync(id);
+            return (manutencao?.Foto, manutencao?.FotoMimeType);
+        }
+
         private ManutencaoDetalhesDto MapearParaManutencaoDetalhesDto(Manutencao manutencao)
         {
             return new ManutencaoDetalhesDto
             {
                 Id = manutencao.Id,
-                DataInicio = manutencao.DataInicio,
-                DataTermino = manutencao.DataTermino,
-                ImagemUrl = manutencao.ImagemUrl,
-                DatasManutencao = manutencao.DatasManutencao,
+                DataManutencao = manutencao.DataManutencao,
+                Descricao = manutencao.Descricao,
+                HasFoto = manutencao.Foto != null,
                 ObraId = manutencao.ObraId,
                 NomeObra = manutencao.Obra?.Nome
             };

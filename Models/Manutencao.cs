@@ -8,10 +8,10 @@ namespace construtivaBack.Models
     {
         [Key]
         public int Id { get; set; }
-        public DateTime DataInicio { get; set; }
-        public DateTime DataTermino { get; set; }
-        public string? ImagemUrl { get; set; }
-        public string? DatasManutencao { get; set; } // JSON string of dates
+        public DateTime DataManutencao { get; set; }
+        public string Descricao { get; set; }
+        public byte[]? Foto { get; set; }
+        public string? FotoMimeType { get; set; }
         
         public int ObraId { get; set; }
         [ForeignKey("ObraId")]

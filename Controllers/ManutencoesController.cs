@@ -2,6 +2,7 @@ using construtivaBack.DTOs;
 using construtivaBack.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace construtivaBack.Controllers
 {
@@ -37,10 +38,22 @@ namespace construtivaBack.Controllers
             return Ok(manutencao);
         }
 
+        // GET: api/obras/{obraId}/Manutencoes/5/foto
+        [HttpGet("{id}/foto")]
+        public async Task<IActionResult> GetManutencaoFoto(int id)
+        {
+            var (foto, mimeType) = await _manutencaoService.ObterFotoManutencaoAsync(id);
+            if (foto == null || mimeType == null)
+            {
+                return NotFound();
+            }
+            return File(foto, mimeType);
+        }
+
         // POST: api/obras/{obraId}/Manutencoes
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ManutencaoDetalhesDto>> PostManutencao(int obraId, [FromBody] ManutencaoCriacaoDto manutencaoDto)
+        public async Task<ActionResult<ManutencaoDetalhesDto>> PostManutencao(int obraId, [FromForm] ManutencaoCriacaoDto manutencaoDto)
         {
             if (!ModelState.IsValid)
             {
@@ -66,7 +79,7 @@ namespace construtivaBack.Controllers
         // PUT: api/obras/{obraId}/Manutencoes/5
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> PutManutencao(int id, [FromBody] ManutencaoAtualizacaoDto manutencaoDto)
+        public async Task<IActionResult> PutManutencao(int id, [FromForm] ManutencaoAtualizacaoDto manutencaoDto)
         {
             if (!ModelState.IsValid)
             {

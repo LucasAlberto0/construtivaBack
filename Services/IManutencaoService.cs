@@ -1,4 +1,6 @@
 using construtivaBack.DTOs;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace construtivaBack.Services
 {
@@ -9,5 +11,6 @@ namespace construtivaBack.Services
         Task<ManutencaoDetalhesDto> CriarManutencaoAsync(ManutencaoCriacaoDto manutencaoDto);
         Task<ManutencaoDetalhesDto?> AtualizarManutencaoAsync(int id, ManutencaoAtualizacaoDto manutencaoDto);
         Task<bool> ExcluirManutencaoAsync(int id);
+        Task<(byte[]?, string?)> ObterFotoManutencaoAsync(int id);
     }
 }

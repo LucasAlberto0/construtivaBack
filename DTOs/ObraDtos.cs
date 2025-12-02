@@ -89,10 +89,9 @@ namespace construtivaBack.DTOs
     public class ManutencaoDto
     {
         public int Id { get; set; }
-        public DateTime DataInicio { get; set; }
-        public DateTime DataTermino { get; set; }
-        public string? ImagemUrl { get; set; }
-        public string? DatasManutencao { get; set; }
+        public DateTime DataManutencao { get; set; }
+        public string Descricao { get; set; }
+        public bool HasFoto { get; set; }
     }
 
     public class DiarioObraDto

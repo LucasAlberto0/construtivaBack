@@ -146,10 +146,9 @@ namespace construtivaBack.Services
                 Manutencoes = obra.Manutencoes?.Select(m => new ManutencaoDto
                 {
                     Id = m.Id,
-                    DataInicio = m.DataInicio,
-                    DataTermino = m.DataTermino,
-                    ImagemUrl = m.ImagemUrl,
-                    DatasManutencao = m.DatasManutencao
+                    DataManutencao = m.DataManutencao,
+                    Descricao = m.Descricao,
+                    HasFoto = m.Foto != null
                 }).ToList(),
                 DiariosObra = obra.DiariosObra?.Select(d => new DiarioObraDto
                 {

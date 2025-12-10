@@ -17,12 +17,12 @@ public class Documento
     public int ObraId { get; set; }
     public Obra Obra { get; set; }
     public string Nome { get; set; }
-    public string Tipo { get; set; } // e.g., "Planta", "Relatório", "Foto"
+    public string Tipo { get; set; }
     public string Descricao { get; set; }
     public DateTime DataUpload { get; set; }
-    public string CaminhoArquivo { get; set; } // Original filename
-    public byte[]? ConteudoArquivo { get; set; } // File content as byte array
-    public long TamanhoArquivo { get; set; } // File size in bytes
-    public DateTime DataAnexamento { get; set; } // Date when the file was attached
+    public string CaminhoArquivo { get; set; }
+    public byte[]? ConteudoArquivo { get; set; }
+    public long TamanhoArquivo { get; set; }
+    public DateTime DataAnexamento { get; set; }
 }
 }

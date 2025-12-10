@@ -2,7 +2,7 @@ using construtivaBack.Data;
 using construtivaBack.DTOs;
 using construtivaBack.Models;
 using Microsoft.EntityFrameworkCore;
-using System.IO; // Required for Path.GetExtension
+using System.IO;
 
 namespace construtivaBack.Services
 {
@@ -23,7 +23,7 @@ namespace construtivaBack.Services
                 {
                     Id = d.Id,
                     Nome = d.Nome,
-                    Tipo = d.Tipo, // Add Tipo
+                    Tipo = d.Tipo,
                     CaminhoArquivo = d.CaminhoArquivo,
                     ObraId = d.ObraId,
                     Descricao = d.Descricao,
@@ -59,11 +59,11 @@ namespace construtivaBack.Services
             var documento = new Documento
             {
                 Nome = documentoDto.Nome,
-                Tipo = documentoDto.Tipo, // Add Tipo
+                Tipo = documentoDto.Tipo,
                 CaminhoArquivo = documentoDto.CaminhoArquivo,
                 ObraId = documentoDto.ObraId,
                 Descricao = documentoDto.Descricao,
-                DataUpload = DateTime.UtcNow // Initialize DataUpload
+                DataUpload = DateTime.UtcNow
             };
 
             _context.Documentos.Add(documento);
@@ -84,7 +84,7 @@ namespace construtivaBack.Services
             }
 
             documento.Nome = documentoDto.Nome;
-            documento.Tipo = documentoDto.Tipo; // Add Tipo
+            documento.Tipo = documentoDto.Tipo;
             documento.CaminhoArquivo = documentoDto.CaminhoArquivo;
             documento.Descricao = documentoDto.Descricao;
 
@@ -128,9 +128,9 @@ namespace construtivaBack.Services
 
                 documento.TamanhoArquivo = anexoDto.Arquivo.Length;
                 documento.DataAnexamento = DateTime.UtcNow;
-                documento.CaminhoArquivo = anexoDto.Arquivo.FileName; // Store original filename
-                documento.Descricao = anexoDto.Descricao ?? documento.Descricao; // Update description if provided
-                documento.Tipo = anexoDto.Tipo ?? documento.Tipo; // Update type if provided
+                documento.CaminhoArquivo = anexoDto.Arquivo.FileName;
+                documento.Descricao = anexoDto.Descricao ?? documento.Descricao;
+                documento.Tipo = anexoDto.Tipo ?? documento.Tipo;
             }
 
             _context.Documentos.Update(documento);
@@ -150,8 +150,7 @@ namespace construtivaBack.Services
                 return (null, null, null);
             }
 
-            // Determine content type based on file extension
-            string contentType = "application/octet-stream"; // Default
+            string contentType = "application/octet-stream";
             if (!string.IsNullOrEmpty(documento.CaminhoArquivo))
             {
                 var extension = Path.GetExtension(documento.CaminhoArquivo)?.ToLowerInvariant();
@@ -175,7 +174,6 @@ namespace construtivaBack.Services
                     case ".png":
                         contentType = "image/png";
                         break;
-                    // Add more types as needed
                 }
             }
 
@@ -188,7 +186,7 @@ namespace construtivaBack.Services
             {
                 Id = documento.Id,
                 Nome = documento.Nome,
-                Tipo = documento.Tipo, // Add Tipo
+                Tipo = documento.Tipo,
                 CaminhoArquivo = documento.CaminhoArquivo,
                 ObraId = documento.ObraId,
                 NomeObra = documento.Obra?.Nome,

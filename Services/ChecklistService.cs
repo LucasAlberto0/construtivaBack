@@ -101,7 +101,6 @@ namespace construtivaBack.Services
 
             checklist.Tipo = checklistDto.Tipo;
 
-            // Atualizar itens existentes e adicionar novos
             if (checklistDto.Itens != null)
             {
                 foreach (var itemDto in checklistDto.Itens)
@@ -115,7 +114,6 @@ namespace construtivaBack.Services
                     }
                     else
                     {
-                        // Adicionar novo item se não existir (apenas se o ID for 0 ou não for fornecido)
                         if (itemDto.Id == 0)
                         {
                             checklist.Itens.Add(new ChecklistItem
@@ -128,7 +126,6 @@ namespace construtivaBack.Services
                     }
                 }
 
-                // Remover itens que não estão mais no DTO
                 var itensParaRemover = checklist.Itens
                     .Where(item => !checklistDto.Itens.Any(dtoItem => dtoItem.Id == item.Id))
                     .ToList();

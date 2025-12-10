@@ -17,7 +17,6 @@ namespace construtivaBack.Controllers
             _checklistService = checklistService;
         }
 
-        // GET: api/obras/{obraId}/Checklists
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ChecklistListagemDto>>> GetChecklists(int obraId)
         {
@@ -25,7 +24,6 @@ namespace construtivaBack.Controllers
             return Ok(checklists);
         }
 
-        // GET: api/obras/{obraId}/Checklists/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ChecklistDetalhesDto>> GetChecklist(int id)
         {
@@ -37,7 +35,6 @@ namespace construtivaBack.Controllers
             return Ok(checklist);
         }
 
-        // POST: api/obras/{obraId}/Checklists
         [HttpPost]
         [Authorize(Roles = "Admin,Coordenador")]
         public async Task<ActionResult<ChecklistDetalhesDto>> PostChecklist(int obraId, [FromBody] ChecklistCriacaoDto checklistDto)
@@ -63,7 +60,6 @@ namespace construtivaBack.Controllers
             }
         }
 
-        // PUT: api/obras/{obraId}/Checklists/5
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin,Coordenador")]
         public async Task<IActionResult> PutChecklist(int id, [FromBody] ChecklistAtualizacaoDto checklistDto)
@@ -81,7 +77,6 @@ namespace construtivaBack.Controllers
             return Ok(checklistAtualizado);
         }
 
-        // DELETE: api/obras/{obraId}/Checklists/5
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin,Coordenador")]
         public async Task<IActionResult> DeleteChecklist(int id)
@@ -94,7 +89,6 @@ namespace construtivaBack.Controllers
             return NoContent();
         }
 
-        // POST: api/obras/{obraId}/Checklists/{checklistId}/itens
         [HttpPost("{checklistId}/itens")]
         [Authorize(Roles = "Admin,Coordenador")]
         public async Task<ActionResult<ChecklistItemDto>> PostChecklistItem(int checklistId, [FromBody] ChecklistItemCriacaoDto itemDto)
@@ -112,7 +106,6 @@ namespace construtivaBack.Controllers
             return CreatedAtAction(nameof(GetChecklist), new { id = checklistId }, itemCriado);
         }
 
-        // PUT: api/obras/{obraId}/Checklists/{checklistId}/itens/{itemId}
         [HttpPut("{checklistId}/itens/{itemId}")]
         [Authorize(Roles = "Admin,Coordenador")]
         public async Task<IActionResult> PutChecklistItem(int itemId, [FromBody] ChecklistItemAtualizacaoDto itemDto)
@@ -135,7 +128,6 @@ namespace construtivaBack.Controllers
             return Ok(itemAtualizado);
         }
 
-        // DELETE: api/obras/{obraId}/Checklists/{checklistId}/itens/{itemId}
         [HttpDelete("{checklistId}/itens/{itemId}")]
         [Authorize(Roles = "Admin,Coordenador")]
         public async Task<IActionResult> DeleteChecklistItem(int itemId)

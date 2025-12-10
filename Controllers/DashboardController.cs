@@ -17,7 +17,6 @@ namespace construtivaBack.Controllers
             _dashboardService = dashboardService;
         }
 
-        // GET: api/Dashboard/summary
         [HttpGet("summary")]
         public async Task<ActionResult<DashboardSummaryDto>> GetDashboardSummary()
         {
@@ -25,7 +24,6 @@ namespace construtivaBack.Controllers
             return Ok(summary);
         }
 
-        // GET: api/Dashboard/overall-stats
         [HttpGet("overall-stats")]
         public async Task<ActionResult<OverallProjectStatsDto>> GetOverallProjectStats()
         {

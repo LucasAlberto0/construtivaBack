@@ -17,7 +17,6 @@ namespace construtivaBack.Controllers
             _aditivoService = aditivoService;
         }
 
-        // GET: api/obras/{obraId}/Aditivos
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AditivoListagemDto>>> GetAditivos(int obraId)
         {
@@ -25,7 +24,6 @@ namespace construtivaBack.Controllers
             return Ok(aditivos);
         }
 
-        // GET: api/obras/{obraId}/Aditivos/5
         [HttpGet("{id}")]
         public async Task<ActionResult<AditivoDetalhesDto>> GetAditivo(int id)
         {
@@ -37,7 +35,6 @@ namespace construtivaBack.Controllers
             return Ok(aditivo);
         }
 
-        // POST: api/obras/{obraId}/Aditivos
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<AditivoDetalhesDto>> PostAditivo(int obraId, [FromBody] AditivoCriacaoDto aditivoDto)
@@ -63,7 +60,6 @@ namespace construtivaBack.Controllers
             }
         }
 
-        // PUT: api/obras/{obraId}/Aditivos/5
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutAditivo(int id, [FromBody] AditivoAtualizacaoDto aditivoDto)
@@ -81,7 +77,6 @@ namespace construtivaBack.Controllers
             return Ok(aditivoAtualizado);
         }
 
-        // DELETE: api/obras/{obraId}/Aditivos/5
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteAditivo(int id)

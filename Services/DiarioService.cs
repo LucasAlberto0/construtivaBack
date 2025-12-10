@@ -82,9 +82,6 @@ namespace construtivaBack.Services
             _context.DiariosDeObra.Add(diario);
             await _context.SaveChangesAsync();
 
-            // Removed the loop for adding comments during diario creation,
-            // as comments should be added via the dedicated endpoint.
-
             await _context.Entry(diario).Reference(d => d.Obra).LoadAsync();
             await _context.Entry(diario).Collection(d => d.Comentarios).Query().Include(c => c.Autor).LoadAsync();
 
@@ -155,9 +152,6 @@ namespace construtivaBack.Services
             var autor = await _userManager.FindByIdAsync(autorId);
             if (autor == null)
             {
-                // This case should ideally not happen if the user is authenticated,
-                // but as a safeguard, we can throw an exception or return null.
-                // For now, let's throw an ArgumentException as it indicates an unexpected state.
                 throw new ArgumentException($"Autor com ID {autorId} não encontrado. O usuário autenticado não foi encontrado no sistema.");
             }
 

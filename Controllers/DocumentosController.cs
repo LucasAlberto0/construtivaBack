@@ -17,7 +17,6 @@ namespace construtivaBack.Controllers
             _documentoService = documentoService;
         }
 
-        // GET: api/obras/{obraId}/Documentos
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DocumentoListagemDto>>> GetDocumentos(int obraId)
         {
@@ -25,7 +24,6 @@ namespace construtivaBack.Controllers
             return Ok(documentos);
         }
 
-        // GET: api/obras/{obraId}/Documentos/5
         [HttpGet("{id}")]
         public async Task<ActionResult<DocumentoDetalhesDto>> GetDocumento(int id)
         {
@@ -37,7 +35,6 @@ namespace construtivaBack.Controllers
             return Ok(documento);
         }
 
-        // POST: api/obras/{obraId}/Documentos
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<DocumentoDetalhesDto>> PostDocumento(int obraId, [FromBody] DocumentoCriacaoDto documentoDto)
@@ -46,13 +43,6 @@ namespace construtivaBack.Controllers
             {
                 return BadRequest(ModelState);
             }
-
-            // The obraId from the route is not directly used in DocumentoCriacaoDto,
-            // but it's good practice to ensure consistency if it were to be used.
-            // For now, we'll assume the DTO contains the correct ObraId.
-            // If you want to enforce that the route obraId matches the DTO's ObraId,
-            // you would add a check here.
-            // Example: if (obraId != documentoDto.ObraId) { return BadRequest(...); }
 
             try
             {
@@ -65,7 +55,6 @@ namespace construtivaBack.Controllers
             }
         }
 
-        // PUT: api/obras/{obraId}/Documentos/5
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutDocumento(int id, [FromBody] DocumentoAtualizacaoDto documentoDto)
@@ -83,9 +72,8 @@ namespace construtivaBack.Controllers
             return Ok(documentoAtualizado);
         }
 
-        // POST: api/obras/{obraId}/Documentos/{id}/anexar
         [HttpPost("{id}/anexar")]
-        [Authorize(Roles = "Admin")] // Assuming only Admins can attach files
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<DocumentoDetalhesDto>> AnexarArquivo(int id, [FromForm] DocumentoAnexoRequestDto anexoDto)
         {
             if (!ModelState.IsValid)
@@ -108,7 +96,6 @@ namespace construtivaBack.Controllers
             }
         }
 
-        // GET: api/obras/{obraId}/Documentos/{id}/download
         [HttpGet("{id}/download")]
         public async Task<IActionResult> DownloadDocumento(int obraId, int id)
         {
@@ -122,7 +109,6 @@ namespace construtivaBack.Controllers
             return File(fileContents, contentType, fileName);
         }
 
-        // DELETE: api/obras/{obraId}/Documentos/5
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteDocumento(int id)

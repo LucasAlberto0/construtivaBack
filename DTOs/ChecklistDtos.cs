@@ -4,7 +4,6 @@ using construtivaBack.Models;
 
 namespace construtivaBack.DTOs
 {
-    // DTO para criação de um novo Checklist
     public class ChecklistCriacaoDto
     {
         [Required(ErrorMessage = "O tipo de checklist é obrigatório.")]
@@ -14,7 +13,6 @@ namespace construtivaBack.DTOs
         public List<ChecklistItemCriacaoDto>? Itens { get; set; }
     }
 
-    // DTO para atualização de um Checklist existente
     public class ChecklistAtualizacaoDto
     {
         [Required(ErrorMessage = "O tipo de checklist é obrigatório.")]
@@ -22,7 +20,6 @@ namespace construtivaBack.DTOs
         public List<ChecklistItemAtualizacaoDto>? Itens { get; set; }
     }
 
-    // DTO para exibição de detalhes de um Checklist
     public class ChecklistDetalhesDto
     {
         public int Id { get; set; }
@@ -32,7 +29,6 @@ namespace construtivaBack.DTOs
         public ICollection<ChecklistItemDto>? Itens { get; set; }
     }
 
-    // DTO para listagem de Checklists
     public class ChecklistListagemDto
     {
         public int Id { get; set; }
@@ -41,7 +37,6 @@ namespace construtivaBack.DTOs
         public string? NomeObra { get; set; }
     }
 
-    // DTO para criação de ChecklistItem
     public class ChecklistItemCriacaoDto
     {
         [Required(ErrorMessage = "O nome do item é obrigatório.")]
@@ -50,7 +45,6 @@ namespace construtivaBack.DTOs
         public string? Observacao { get; set; }
     }
 
-    // DTO para atualização de ChecklistItem
     public class ChecklistItemAtualizacaoDto
     {
         [Required(ErrorMessage = "O ID do item é obrigatório para atualização.")]
@@ -61,7 +55,6 @@ namespace construtivaBack.DTOs
         public string? Observacao { get; set; }
     }
 
-    // DTO para exibição de ChecklistItem
     public class ChecklistItemDto
     {
         public int Id { get; set; }

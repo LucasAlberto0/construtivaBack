@@ -21,14 +21,12 @@ public class UsersController : ControllerBase
     [HttpPost("me/profile-picture")]
     public async Task<IActionResult> UploadProfilePicture(IFormFile profilePicture)
     {
-        // 1. Get User
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId == null) return Unauthorized();
         
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null) return NotFound("User not found.");
 
-        // 2. Validate File
         if (profilePicture == null || profilePicture.Length == 0)
         {
             return BadRequest("No file uploaded.");
@@ -45,7 +43,6 @@ public class UsersController : ControllerBase
             return BadRequest("Invalid file type. Only JPG, PNG, and WEBP are allowed.");
         }
 
-        // 3. Convert file to byte array and update user
         using (var memoryStream = new MemoryStream())
         {
             await profilePicture.CopyToAsync(memoryStream);
@@ -64,7 +61,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("{userId}/profile-picture")]
-    [AllowAnonymous] // Allow anonymous to make it easier for img tags to fetch the picture
+    [AllowAnonymous]
     public async Task<IActionResult> GetUserProfilePicture(string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);

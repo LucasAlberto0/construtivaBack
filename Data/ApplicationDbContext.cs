@@ -24,6 +24,5 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        // Configurações adicionais do modelo, como chaves compostas ou relacionamentos complexos, podem ser adicionadas aqui.
     }
 }

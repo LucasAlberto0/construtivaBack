@@ -18,7 +18,7 @@ namespace construtivaBack.DTOs
         public int TotalProjects { get; set; }
         public Dictionary<string, int> ProjectsByStatus { get; set; } = new Dictionary<string, int>();
         public Dictionary<string, int> ProjectsByLocation { get; set; } = new Dictionary<string, int>();
-        public double AverageProjectDurationDays { get; set; } // For completed projects
+        public double AverageProjectDurationDays { get; set; }
         public Dictionary<string, int> ProjectsByCoordinator { get; set; } = new Dictionary<string, int>();
         public double AverageDocumentsPerProject { get; set; }
     }

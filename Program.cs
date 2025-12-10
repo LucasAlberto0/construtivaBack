@@ -7,24 +7,21 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using construtivaBack.Services;
-using construtivaBack.Identity; // Add this line
+using construtivaBack.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 var Configuration = builder.Configuration;
 
-// 1. Configure EF Core with In-Memory Database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"));
 });
 
-// 2. Configure ASP.NET Core Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders()
-    .AddErrorDescriber<CustomIdentityErrorDescriber>(); // Add this line
+    .AddErrorDescriber<CustomIdentityErrorDescriber>();
 
-// 3. Configure JWT Authentication
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -48,7 +45,6 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddControllers();
 builder.Services.AddCors();
 
-// Register Services
 builder.Services.AddScoped<IObraService, ObraService>();
 builder.Services.AddScoped<IDiarioService, DiarioService>();
 builder.Services.AddScoped<IDocumentoService, DocumentoService>();
@@ -58,7 +54,6 @@ builder.Services.AddScoped<IChecklistService, ChecklistService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
-// 4. Configure Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -91,7 +86,6 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -109,7 +103,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Seed the database with initial roles
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;

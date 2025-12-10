@@ -40,11 +40,9 @@ public class AuthService : IAuthService
 
         if (createResult.Succeeded)
         {
-            // Add user to the specified role
             var roleResult = await _userManager.AddToRoleAsync(user, model.Role);
             if (!roleResult.Succeeded)
             {
-                // If role assignment fails, delete the user to prevent orphaned accounts
                 await _userManager.DeleteAsync(user);
                 return IdentityResult.Failed(new IdentityError { Description = "Falha ao atribuir perfil ao usuário." });
             }
@@ -61,7 +59,7 @@ public class AuthService : IAuthService
             var authClaims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.UserName),
-                new Claim(ClaimTypes.NameIdentifier, user.Id), // Adicionado para incluir o ID do usuário
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
 

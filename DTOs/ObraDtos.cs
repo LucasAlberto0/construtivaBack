@@ -5,7 +5,6 @@ using construtivaBack.Models;
 
 namespace construtivaBack.DTOs
 {
-    // DTO para criação de uma nova Obra
     public class ObraCriacaoDto
     {
         [Required(ErrorMessage = "O nome da obra é obrigatório.")]
@@ -24,7 +23,6 @@ namespace construtivaBack.DTOs
         public string? Observacoes { get; set; }
     }
 
-    // DTO para atualização de uma Obra existente
     public class ObraAtualizacaoDto
     {
         [Required(ErrorMessage = "O nome da obra é obrigatório.")]
@@ -43,7 +41,6 @@ namespace construtivaBack.DTOs
         public string? Observacoes { get; set; }
     }
 
-    // DTO para exibição de detalhes de uma Obra
     public class ObraDetalhesDto
     {
         public int Id { get; set; }
@@ -67,7 +64,6 @@ namespace construtivaBack.DTOs
         public ICollection<ChecklistDto>? Checklists { get; set; }
     }
 
-    // DTO para listagem de Obras (visão mais resumida)
     public class ObraListagemDto
     {
         public int Id { get; set; }
@@ -78,7 +74,6 @@ namespace construtivaBack.DTOs
         public DateTime? DataTermino { get; set; }
     }
 
-    // DTOs para entidades relacionadas (simplificados para ObraDetalhesDto)
     public class AditivoDto
     {
         public int Id { get; set; }
@@ -108,13 +103,13 @@ namespace construtivaBack.DTOs
     public class DocumentoDto
     {
         public int Id { get; set; }
-        public string Nome { get; set; } // Renamed from NomeArquivo
-        public string Tipo { get; set; } // New
-        public string CaminhoArquivo { get; set; } // Renamed from Url
-        public string? Descricao { get; set; } // New
-        public long TamanhoArquivo { get; set; } // New
-        public DateTime DataAnexamento { get; set; } // New
-        public DateTime DataUpload { get; set; } // Existing
+        public string Nome { get; set; }
+        public string Tipo { get; set; }
+        public string CaminhoArquivo { get; set; }
+        public string? Descricao { get; set; }
+        public long TamanhoArquivo { get; set; }
+        public DateTime DataAnexamento { get; set; }
+        public DateTime DataUpload { get; set; }
     }
 
     public class ChecklistDto

@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Http;
 
 namespace construtivaBack.DTOs
 {
-    // DTO para criação de um novo Diário de Obra
     public class DiarioObraCriacaoDto
     {
         [Required(ErrorMessage = "A data do diário é obrigatória.")]
@@ -23,7 +22,6 @@ namespace construtivaBack.DTOs
         public List<ComentarioCriacaoDto>? Comentarios { get; set; }
     }
 
-    // DTO para atualização de um Diário de Obra existente
     public class DiarioObraAtualizacaoDto
     {
         [Required(ErrorMessage = "A data do diário é obrigatória.")]
@@ -37,7 +35,6 @@ namespace construtivaBack.DTOs
         public IFormFile? Foto { get; set; }
     }
 
-    // DTO para exibição de detalhes de um Diário de Obra
     public class DiarioObraDetalhesDto
     {
         public int Id { get; set; }
@@ -52,7 +49,6 @@ namespace construtivaBack.DTOs
         public ICollection<ComentarioDto>? Comentarios { get; set; }
     }
 
-    // DTO para listagem de Diários de Obra
     public class DiarioObraListagemDto
     {
         public int Id { get; set; }
@@ -62,14 +58,12 @@ namespace construtivaBack.DTOs
         public string? NomeObra { get; set; }
     }
 
-    // DTO para criação de Comentário
     public class ComentarioCriacaoDto
     {
         [Required(ErrorMessage = "O texto do comentário é obrigatório.")]
         public string Texto { get; set; }
     }
 
-    // DTO para exibição de Comentário
     public class ComentarioDto
     {
         public int Id { get; set; }

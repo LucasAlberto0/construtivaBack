@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Http;
 
 namespace construtivaBack.DTOs
 {
-    // DTO para criação de uma nova Manutenção
     public class ManutencaoCriacaoDto
     {
         [Required(ErrorMessage = "A data de manutenção é obrigatória.")]
@@ -16,7 +15,6 @@ namespace construtivaBack.DTOs
         public IFormFile? Foto { get; set; }
     }
 
-    // DTO para atualização de uma Manutenção existente
     public class ManutencaoAtualizacaoDto
     {
         [Required(ErrorMessage = "A data de manutenção é obrigatória.")]
@@ -26,7 +24,6 @@ namespace construtivaBack.DTOs
         public IFormFile? Foto { get; set; }
     }
 
-    // DTO para exibição de detalhes de uma Manutenção
     public class ManutencaoDetalhesDto
     {
         public int Id { get; set; }
@@ -37,7 +34,6 @@ namespace construtivaBack.DTOs
         public string? NomeObra { get; set; }
     }
 
-    // DTO para listagem de Manutenções
     public class ManutencaoListagemDto
     {
         public int Id { get; set; }

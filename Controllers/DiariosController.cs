@@ -3,7 +3,7 @@ using construtivaBack.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using System.Security.Claims; // Added for ClaimTypes
+using System.Security.Claims;
 
 namespace construtivaBack.Controllers
 {
@@ -19,7 +19,6 @@ namespace construtivaBack.Controllers
             _diarioService = diarioService;
         }
 
-        // GET: api/obras/{obraId}/Diarios
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DiarioObraListagemDto>>> GetDiarios(int obraId)
         {
@@ -27,8 +26,7 @@ namespace construtivaBack.Controllers
             return Ok(diarios);
         }
 
-        // GET: api/obras/{obraId}/Diarios/5
-        [HttpGet("{id}", Name = "GetDiarioById")] // Added Name property
+        [HttpGet("{id}", Name = "GetDiarioById")]
         public async Task<ActionResult<DiarioObraDetalhesDto>> GetDiario(int id)
         {
             var diario = await _diarioService.ObterDiarioPorIdAsync(id);
@@ -39,7 +37,6 @@ namespace construtivaBack.Controllers
             return Ok(diario);
         }
 
-        // GET: api/obras/{obraId}/Diarios/5/foto
         [HttpGet("{id}/foto")]
         public async Task<IActionResult> GetDiarioFoto(int id)
         {
@@ -51,7 +48,6 @@ namespace construtivaBack.Controllers
             return File(foto, mimeType);
         }
 
-        // POST: api/obras/{obraId}/Diarios
         [HttpPost]
         [Authorize(Roles = "Admin,Fiscal")]
         public async Task<ActionResult<DiarioObraDetalhesDto>> PostDiario(int obraId, [FromForm] DiarioObraCriacaoDto diarioDto)
@@ -77,7 +73,6 @@ namespace construtivaBack.Controllers
             }
         }
 
-        // PUT: api/obras/{obraId}/Diarios/5
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin,Fiscal")]
         public async Task<IActionResult> PutDiario(int id, [FromForm] DiarioObraAtualizacaoDto diarioDto)
@@ -95,7 +90,6 @@ namespace construtivaBack.Controllers
             return Ok(diarioAtualizado);
         }
 
-        // DELETE: api/obras/{obraId}/Diarios/5
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin,Fiscal")]
         public async Task<IActionResult> DeleteDiario(int id)
@@ -108,7 +102,6 @@ namespace construtivaBack.Controllers
             return NoContent();
         }
 
-        // POST: api/obras/{obraId}/Diarios/{diarioId}/comentarios
         [HttpPost("{diarioId}/comentarios")]
         [Authorize(Roles = "Admin,Fiscal")]
         public async Task<ActionResult<ComentarioDto>> AdicionarComentario(int obraId, int diarioId, [FromBody] ComentarioCriacaoDto comentarioDto)
@@ -134,7 +127,6 @@ namespace construtivaBack.Controllers
             }
         }
 
-        // DELETE: api/obras/{obraId}/Diarios/{diarioId}/comentarios/{comentarioId}
         [HttpDelete("{diarioId}/comentarios/{comentarioId}")]
         [Authorize(Roles = "Admin,Fiscal")]
         public async Task<IActionResult> RemoverComentario(int comentarioId)

@@ -18,7 +18,6 @@ namespace construtivaBack.Controllers
             _manutencaoService = manutencaoService;
         }
 
-        // GET: api/obras/{obraId}/Manutencoes
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ManutencaoListagemDto>>> GetManutencoes(int obraId)
         {
@@ -26,7 +25,6 @@ namespace construtivaBack.Controllers
             return Ok(manutencoes);
         }
 
-        // GET: api/obras/{obraId}/Manutencoes/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ManutencaoDetalhesDto>> GetManutencao(int id)
         {
@@ -38,7 +36,6 @@ namespace construtivaBack.Controllers
             return Ok(manutencao);
         }
 
-        // GET: api/obras/{obraId}/Manutencoes/5/foto
         [HttpGet("{id}/foto")]
         public async Task<IActionResult> GetManutencaoFoto(int id)
         {
@@ -50,7 +47,6 @@ namespace construtivaBack.Controllers
             return File(foto, mimeType);
         }
 
-        // POST: api/obras/{obraId}/Manutencoes
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ManutencaoDetalhesDto>> PostManutencao(int obraId, [FromForm] ManutencaoCriacaoDto manutencaoDto)
@@ -76,7 +72,6 @@ namespace construtivaBack.Controllers
             }
         }
 
-        // PUT: api/obras/{obraId}/Manutencoes/5
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutManutencao(int id, [FromForm] ManutencaoAtualizacaoDto manutencaoDto)
@@ -94,7 +89,6 @@ namespace construtivaBack.Controllers
             return Ok(manutencaoAtualizada);
         }
 
-        // DELETE: api/obras/{obraId}/Manutencoes/5
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteManutencao(int id)
